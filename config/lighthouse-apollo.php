@@ -42,4 +42,9 @@ return [
      * Whether to remove the tracing information from the extensions key in the GraphQL response.
      */
     'mute_tracing_extensions' => env('APP_DEBUG', false) !== true,
+
+    /**
+     * Which request headers to not include in the HTTP information for a tracing. Should be lowercase.
+     */
+    'excluded_request_headers' => ['authentication'],
 ];

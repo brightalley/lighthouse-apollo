@@ -6,6 +6,10 @@ class TracingResult
 {
     public string $queryText;
 
+    public array $client;
+
+    public array $http;
+
     /**
      * @var array{
      *     duration: int
@@ -29,11 +33,15 @@ class TracingResult
      * Constructor.
      *
      * @param string $queryText
+     * @param array $client
+     * @param array $http
      * @param array $tracing
      */
-    public function __construct(string $queryText, array $tracing)
+    public function __construct(string $queryText, array $client, array $http, array $tracing)
     {
         $this->queryText = $queryText;
+        $this->client = $client;
+        $this->http = $http;
         $this->tracing = $tracing;
     }
 }

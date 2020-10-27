@@ -112,9 +112,13 @@ class SendTracingToApollo
         // Lighthouse's format is not fully compatible with what Apollo expects.
         // In particular, Apollo expects a sort of tree structure, whereas Lighthouse produces a flat array.
         $result = new Trace([
+            'client_address' => $tracingResult->client['address'],
+            'client_name' => $tracingResult->client['name'],
+            'client_reference_id' => $tracingResult->client['reference_id'],
+            'client_version' => $tracingResult->client['version'],
             'duration_ns' => $tracingResult->tracing['duration'],
             'end_time' => $this->dateTimeStringToTimestampField($tracingResult->tracing['endTime']),
-            'http' => new Trace\HTTP(['method' => Trace\HTTP\Method::POST]),
+            'http' => new Trace\HTTP($tracingResult->http),
             'start_time' => $this->dateTimeStringToTimestampField($tracingResult->tracing['startTime']),
         ]);
         foreach ($tracingResult->tracing['execution']['resolvers'] as $trace) {

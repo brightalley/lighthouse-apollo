@@ -3,6 +3,7 @@
 namespace BrightAlley\LighthouseApollo;
 
 use BrightAlley\LighthouseApollo\Commands\SubmitTracing;
+use BrightAlley\LighthouseApollo\Contracts\ClientInformationExtractor;
 use BrightAlley\LighthouseApollo\Listeners\ManipulateResultListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
@@ -26,6 +27,7 @@ class ServiceProvider extends BaseServiceProvider
     public function register(): void
     {
         $this->app->register(TracingServiceProvider::class);
+        $this->app->bind(ClientInformationExtractor::class, DefaultClientInformationExtractor::class);
 
         $this->mergeConfigFrom(__DIR__ . '/../config/lighthouse-apollo.php', 'lighthouse-apollo');
 
