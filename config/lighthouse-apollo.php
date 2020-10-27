@@ -22,6 +22,11 @@ return [
     'tracing_endpoint' => 'https://usage-reporting.api.apollographql.com/api/ingress/traces',
 
     /**
+     * Which endpoint to send schema registrations.
+     */
+    'schema_reporting_endpoint' => 'https://schema-reporting.api.apollographql.com/api/graphql',
+
+    /**
      * How and when to send tracing results.
      *
      * Options are:

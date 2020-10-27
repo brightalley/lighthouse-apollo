@@ -2,6 +2,7 @@
 
 namespace BrightAlley\LighthouseApollo;
 
+use BrightAlley\LighthouseApollo\Commands\RegisterSchema;
 use BrightAlley\LighthouseApollo\Commands\SubmitTracing;
 use BrightAlley\LighthouseApollo\Contracts\ClientInformationExtractor;
 use BrightAlley\LighthouseApollo\Listeners\ManipulateResultListener;
@@ -41,6 +42,7 @@ class ServiceProvider extends BaseServiceProvider
         ], 'lighthouse-apollo');
 
         $this->commands([
+            RegisterSchema::class,
             SubmitTracing::class,
         ]);
     }
