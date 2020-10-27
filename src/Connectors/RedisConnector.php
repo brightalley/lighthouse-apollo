@@ -44,7 +44,7 @@ class RedisConnector
      */
     public function putMany(array $tracings): void
     {
-        $this->redis->command('rpush', [self::REDIS_KEY, ...array_map(function (TracingResult $tracingResult) {
+        $this->redis->command('rpush', [self::REDIS_KEY, ...array_map(static function (TracingResult $tracingResult) {
             return serialize($tracingResult);
         }, $tracings)]);
     }

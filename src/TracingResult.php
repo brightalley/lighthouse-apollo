@@ -4,10 +4,7 @@ namespace BrightAlley\LighthouseApollo;
 
 class TracingResult
 {
-    /**
-     * @var string
-     */
-    public $queryText;
+    public string $queryText;
 
     /**
      * @var array{
@@ -26,7 +23,7 @@ class TracingResult
      *     }
      * }
      */
-    public $tracing;
+    public array $tracing;
 
     /**
      * Constructor.

@@ -6,6 +6,7 @@ use BrightAlley\LighthouseApollo\Actions\SendTracingToApollo;
 use BrightAlley\LighthouseApollo\Connectors\RedisConnector;
 use BrightAlley\LighthouseApollo\Exceptions\InvalidTracingSendMode;
 use BrightAlley\LighthouseApollo\TracingResult;
+use Exception;
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Http\Request;
 use LogicException;
@@ -14,25 +15,13 @@ use Nuwave\Lighthouse\Schema\Source\SchemaSourceProvider;
 
 class ManipulateResultListener
 {
-    /**
-     * @var Config
-     */
-    private $config;
+    private Config $config;
 
-    /**
-     * @var Request
-     */
-    private $request;
+    private Request $request;
 
-    /**
-     * @var SchemaSourceProvider
-     */
-    private $schemaSourceProvider;
+    private SchemaSourceProvider $schemaSourceProvider;
 
-    /**
-     * @var RedisConnector
-     */
-    private $redisConnector;
+    private RedisConnector $redisConnector;
 
     /**
      * Constructor.
@@ -73,8 +62,22 @@ class ManipulateResultListener
         $tracingSendMode = $this->config->get('lighthouse-apollo.send_tracing_mode');
         switch ($tracingSendMode) {
             case 'sync':
-                (new SendTracingToApollo($this->config, $this->schemaSourceProvider, [$trace]))
-                    ->send();
+                try {
+                    (new SendTracingToApollo($this->config, $this->schemaSourceProvider, [$trace]))
+                        ->send();
+                } catch (Exception $e) {
+                    // We should probably not cause pain for the end users. Just include this in the extensions instead.
+                    $event->result->extensions['errors'][] = [
+                        'message' => $e->getMessage(),
+                        'extensions' => [
+                            'type' => get_class($e),
+                            'code' => $e->getCode(),
+                            ...($this->config->get('app.debug') ? [
+                                'trace' => $e->getTraceAsString(),
+                            ] : []),
+                        ],
+                    ];
+                }
                 break;
             case 'redis':
                 $this->redisConnector->put($trace);

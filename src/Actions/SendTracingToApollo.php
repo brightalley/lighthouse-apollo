@@ -9,7 +9,6 @@ use DateTime;
 use Exception;
 use Google\Protobuf\Timestamp;
 use Illuminate\Contracts\Config\Repository as Config;
-use Illuminate\Support\Arr;
 use Mdg\Report;
 use Mdg\ReportHeader;
 use Mdg\Trace;
@@ -21,17 +20,11 @@ class SendTracingToApollo
     /**
      * @var TracingResult[]
      */
-    private $tracing;
+    private array $tracing;
 
-    /**
-     * @var Config
-     */
-    private $config;
+    private Config $config;
 
-    /**
-     * @var SchemaSourceProvider
-     */
-    private $schemaSourceProvider;
+    private SchemaSourceProvider $schemaSourceProvider;
 
     /**
      * Constructor.
@@ -67,7 +60,7 @@ class SendTracingToApollo
             $tracesPerQuery[$querySignature][] = $this->transformTracing($trace);
         }
 
-        $tracesPerQuery = array_map(function (array $tracesAndStats): TracesAndStats {
+        $tracesPerQuery = array_map(static function (array $tracesAndStats): TracesAndStats {
             return new TracesAndStats(['trace' => $tracesAndStats]);
         }, $tracesPerQuery);
 
