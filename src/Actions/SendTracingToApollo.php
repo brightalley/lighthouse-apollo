@@ -169,7 +169,6 @@ class SendTracingToApollo
                 $child = $target->getChild();
                 $target->setChild(array_merge($this->iteratorToArray($child), [$node]));
             }
-
         }
 
         return $result;

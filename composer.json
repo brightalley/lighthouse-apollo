@@ -30,6 +30,7 @@
         "nuwave/lighthouse": "^v4"
     },
     "require-dev": {
+        "squizlabs/php_codesniffer": "^3.5",
         "vimeo/psalm": "^4.0"
     },
     "autoload": {

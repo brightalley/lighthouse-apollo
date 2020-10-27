@@ -42,8 +42,7 @@ class ManipulateResultListener
         RedisConnector $redisConnector,
         Request $request,
         SchemaSourceProvider $schemaSourceProvider
-    )
-    {
+    ) {
         $this->config = $config;
         $this->clientInformationExtractor = $clientInformationExtractor;
         $this->redisConnector = $redisConnector;
