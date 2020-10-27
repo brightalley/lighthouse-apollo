@@ -2,6 +2,7 @@
 
 namespace BrightAlley\LighthouseApollo;
 
+use BrightAlley\LighthouseApollo\Commands\SubmitTracing;
 use BrightAlley\LighthouseApollo\Listeners\ManipulateResultListener;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
@@ -36,5 +37,9 @@ class ServiceProvider extends BaseServiceProvider
         $this->publishes([
             __DIR__ . '/../config/lighthouse-apollo.php' => config_path('lighthouse-apollo.php')
         ], 'lighthouse-apollo');
+
+        $this->commands([
+            SubmitTracing::class,
+        ]);
     }
 }

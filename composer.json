@@ -24,6 +24,7 @@
         "ext-json": "*",
         "ext-zlib": "*",
         "google/protobuf": "^v3.13.0.1",
+        "illuminate/redis": "^6.0 || ^7.0 || ^v8.0",
         "illuminate/support": "^6.0 || ^7.0 || ^v8.0",
         "nuwave/lighthouse": "^v4"
     },

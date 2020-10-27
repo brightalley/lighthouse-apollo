@@ -6,6 +6,7 @@ use BrightAlley\LighthouseApollo\Exceptions\SendTracingRequestFailedException;
 use BrightAlley\LighthouseApollo\Exceptions\SendTracingRequestInvalidResponseCode;
 use BrightAlley\LighthouseApollo\TracingResult;
 use DateTime;
+use Exception;
 use Google\Protobuf\Timestamp;
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Support\Arr;
@@ -48,6 +49,10 @@ class SendTracingToApollo
 
     /**
      * Send the traces to Apollo Studio.
+     *
+     * @throws Exception
+     * @throws SendTracingRequestInvalidResponseCode
+     * @throws SendTracingRequestFailedException
      */
     public function send(): void
     {
@@ -107,6 +112,7 @@ class SendTracingToApollo
      *
      * @param TracingResult $tracingResult
      * @return Trace
+     * @throws Exception
      */
     private function transformTracing(TracingResult $tracingResult): Trace
     {
@@ -137,7 +143,7 @@ class SendTracingToApollo
                     if ($pathSegment === 0) {
                         $matchingIndex = null;
                         foreach ($target->getChild() as $child) {
-                            if ($child->getIndex() === (int) $pathSegment) {
+                            if ($child->getIndex() === $pathSegment) {
                                 $matchingIndex = $child;
                                 break;
                             }
@@ -214,6 +220,7 @@ class SendTracingToApollo
      *
      * @param string $dateTime
      * @return Timestamp
+     * @throws Exception
      */
     private function dateTimeStringToTimestampField(string $dateTime): Timestamp
     {

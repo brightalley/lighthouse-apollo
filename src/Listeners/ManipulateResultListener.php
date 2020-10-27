@@ -3,6 +3,7 @@
 namespace BrightAlley\LighthouseApollo\Listeners;
 
 use BrightAlley\LighthouseApollo\Actions\SendTracingToApollo;
+use BrightAlley\LighthouseApollo\Connectors\RedisConnector;
 use BrightAlley\LighthouseApollo\Exceptions\InvalidTracingSendMode;
 use BrightAlley\LighthouseApollo\TracingResult;
 use Illuminate\Contracts\Config\Repository as Config;
@@ -29,15 +30,22 @@ class ManipulateResultListener
     private $schemaSourceProvider;
 
     /**
+     * @var RedisConnector
+     */
+    private $redisConnector;
+
+    /**
      * Constructor.
      *
      * @param Config $config
+     * @param RedisConnector $redisConnector
      * @param Request $request
      * @param SchemaSourceProvider $schemaSourceProvider
      */
-    public function __construct(Config $config, Request $request, SchemaSourceProvider $schemaSourceProvider)
+    public function __construct(Config $config, RedisConnector $redisConnector, Request $request, SchemaSourceProvider $schemaSourceProvider)
     {
         $this->config = $config;
+        $this->redisConnector = $redisConnector;
         $this->request = $request;
         $this->schemaSourceProvider = $schemaSourceProvider;
     }
@@ -68,8 +76,10 @@ class ManipulateResultListener
                 (new SendTracingToApollo($this->config, $this->schemaSourceProvider, [$trace]))
                     ->send();
                 break;
-            case 'database':
             case 'redis':
+                $this->redisConnector->put($trace);
+                break;
+            case 'database':
                 throw new LogicException('Not yet implemented.');
             default:
                 throw new InvalidTracingSendMode($tracingSendMode);
