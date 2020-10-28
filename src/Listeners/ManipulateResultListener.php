@@ -58,11 +58,11 @@ class ManipulateResultListener
      */
     public function handle(ManipulateResult $event): void
     {
-        if (!isset($event->result->extensions['tracing'])) {
-            return;
-        }
-
-        if ($this->isIntrospectionQuery($event)) {
+        if (
+            !isset($event->result->extensions['tracing']) ||
+            !$this->config->get('lighthouse-apollo.apollo_key') ||
+            $this->isIntrospectionQuery($event)
+        ) {
             return;
         }
 
