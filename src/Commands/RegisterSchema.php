@@ -5,11 +5,14 @@ namespace BrightAlley\LighthouseApollo\Commands;
 use BrightAlley\LighthouseApollo\Exceptions\ConfigurationException;
 use BrightAlley\LighthouseApollo\Exceptions\RegisterSchemaFailedException;
 use BrightAlley\LighthouseApollo\Exceptions\RegisterSchemaRequestFailedException;
-use Illuminate\Contracts\Config\Repository as Config;
+use BrightAlley\LighthouseApollo\Graph\GitContextInput;
+use BrightAlley\LighthouseApollo\Graph\UploadSchemaVariables;
+use Cz\Git\GitException;
+use Cz\Git\GitRepository;
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
+use Illuminate\Contracts\Config\Repository as Config;
+use Illuminate\Contracts\Foundation\Application;
 use JsonException;
-use LogicException;
 use Nuwave\Lighthouse\Schema\Source\SchemaSourceProvider;
 
 /**
@@ -17,20 +20,22 @@ use Nuwave\Lighthouse\Schema\Source\SchemaSourceProvider;
  */
 class RegisterSchema extends Command
 {
-    private const MUTATION = <<<'EOT'
-mutation ReportServerInfo($info: EdgeServerInfo!, $executableSchema: String) {
-  me {
-    __typename
-    ... on ServiceMutation {
-      reportServerInfo(info: $info, executableSchema: $executableSchema) {
-        __typename
-        ... on ReportServerInfoError {
-          message
-          code
-        }
-        ... on ReportServerInfoResponse {
-          inSeconds
-          withExecutableSchema
+    private const UPLOAD_SCHEMA_MUTATION = <<<'EOT'
+mutation UploadSchema(
+  $id: ID!
+  $schemaDocument: String!
+  $tag: String!
+  $gitContext: GitContextInput
+) {
+  service(id: $id) {
+    uploadSchema(schemaDocument: $schemaDocument, tag: $tag, gitContext: $gitContext) {
+      code
+      message
+      success
+      tag {
+        tag
+        schema {
+          hash
         }
       }
     }
@@ -56,16 +61,20 @@ EOT;
 
     private SchemaSourceProvider $schemaSourceProvider;
 
+    private Application $app;
+
     /**
      * Create a new console command instance.
      *
+     * @param Application $app
      * @param Config $config
      * @param SchemaSourceProvider $schemaSourceProvider
      */
-    public function __construct(Config $config, SchemaSourceProvider $schemaSourceProvider)
+    public function __construct(Application $app, Config $config, SchemaSourceProvider $schemaSourceProvider)
     {
         parent::__construct();
 
+        $this->app = $app;
         $this->config = $config;
         $this->schemaSourceProvider = $schemaSourceProvider;
     }
@@ -80,17 +89,24 @@ EOT;
      */
     public function handle(): void
     {
-        $schemaString = $this->schemaSourceProvider->getSchemaString();
-        $variables = [
-            'info' => [
-                'bootId' => Str::uuid()->toString(),
-                'executableSchemaId' => hash('sha256', $schemaString),
-                'graphVariant' => $this->config->get('lighthouse-apollo.apollo_graph_variant'),
-            ],
-            'executableSchema' => null,
-        ];
+        $variables = new UploadSchemaVariables(
+            $this->config->get('lighthouse-apollo.apollo_graph_id'),
+            $this->schemaSourceProvider->getSchemaString(),
+            $this->config->get('lighthouse-apollo.apollo_graph_variant'),
+            $this->getGitContext(),
+        );
 
-        $this->trySend($schemaString, $variables);
+        $response = ($this->sendSchemaToApollo($variables));
+        if (!empty($response['errors'])) {
+            throw new RegisterSchemaFailedException(implode(', ', array_map(function ($error) {
+                return $error['message'];
+            }, $response['errors'])));
+        }
+
+        $this->output->success(
+            'Upload schema succeeded. Response from Apollo Studio: ' .
+            var_export($response['data']['service']['uploadSchema'], true)
+        );
     }
 
     /**
@@ -99,16 +115,15 @@ EOT;
      * @throws RegisterSchemaRequestFailedException
      * @throws JsonException
      */
-    protected function sendSchemaToApollo(array $variables): array
+    protected function sendSchemaToApollo(UploadSchemaVariables $variables): array
     {
         $request = curl_init($this->config->get('lighthouse-apollo.schema_reporting_endpoint'));
         curl_setopt_array($request, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode([
-                'query' => self::MUTATION,
-                'operationName' => 'ReportServerInfo',
-                'variables' => $variables,
+                'query' => self::UPLOAD_SCHEMA_MUTATION,
+                'variables' => $variables->toArray(),
             ], JSON_THROW_ON_ERROR),
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
@@ -127,81 +142,25 @@ EOT;
         return json_decode($response, true, 512, JSON_THROW_ON_ERROR);
     }
 
-    /**
-     * @param string $schemaString
-     * @param array $variables
-     * @param bool $waited
-     * @throws ConfigurationException
-     * @throws JsonException
-     * @throws RegisterSchemaFailedException
-     * @throws RegisterSchemaRequestFailedException
-     */
-    protected function trySend(string $schemaString, array $variables, bool $waited = false): void
+    private function getGitContext(): ?GitContextInput
     {
-        $data = $this->sendSchemaToApollo($variables);
-        if (!empty($data['errors'])) {
-            throw new RegisterSchemaFailedException(implode(', ', array_map(function ($error) {
-                return $error['message'];
-            }, $data['errors'])));
+        $repo = new GitRepository($this->app->basePath());
+
+        try {
+            $currentBranchName = $repo->getCurrentBranchName();
+        } catch (GitException $e) {
+            $currentBranchName = null;
         }
 
-        if (empty($data) || !isset($data['data']['me']['__typename'])) {
-            throw new LogicException(
-                'Invalid response when registering schema with Apollo. Data received: ' . var_export($data, true)
-            );
-        }
+        $lastCommitId = $repo->getLastCommitId();
+        $commitData = $repo->getCommitData($lastCommitId);
 
-        $data = $data['data'];
-        if ($data['me']['__typename'] === 'UserMutation') {
-            throw new ConfigurationException(
-                'This server was configured with an API key for a user. ' .
-                "Only a service's API key may be used for schema reporting. " .
-                'Please visit the settings for this graph at ' .
-                'https://studio.apollographql.com/ to obtain an API key for a service.'
-            );
-        }
-
-        if ($data['me']['__typename'] === 'ServiceMutation' && isset($data['me']['reportServerInfo'])) {
-            if ($data['me']['reportServerInfo']['__typename'] === 'ReportServerInfoResponse') {
-                if ($waited) {
-                    // I guess this means we're done now!
-                    $this->output->writeln('Schema in Apollo Studio is up-to-date.');
-
-                    return;
-                }
-
-                $this->output->writeln(
-                    'Sending schema to Apollo Studio in ' . $data['me']['reportServerInfo']['inSeconds'] . ' seconds'
-                );
-
-                $progress = $this->output->createProgressBar($data['me']['reportServerInfo']['inSeconds']);
-                for ($i = 0; $i < $data['me']['reportServerInfo']['inSeconds']; ++$i) {
-                    sleep(1);
-
-                    $progress->advance();
-                }
-
-                $progress->finish();
-
-                $this->output->writeln('');
-                $this->output->writeln('Sending schema now.');
-                $this->trySend($schemaString, array_merge($variables, [
-                    'executableSchema' => $data['me']['reportServerInfo']['withExecutableSchema']
-                        ? $schemaString
-                        : null,
-                ]), true);
-
-                return;
-            }
-
-            throw new RegisterSchemaFailedException(
-                'Received input validation error from Apollo: ' . $data['me']['reportServerInfo']['message'],
-                $data['me']['reportServerInfo']['code']
-            );
-        }
-
-        throw new LogicException(
-            'Invalid response when registering schema with Apollo. Data received: ' . var_export($data, true)
+        return new GitContextInput(
+            $currentBranchName,
+            $lastCommitId,
+            $commitData['author'],
+            $commitData['subject'],
+            null
         );
     }
 }

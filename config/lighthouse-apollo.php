@@ -7,6 +7,11 @@ return [
     'apollo_key' => env('APOLLO_KEY'),
 
     /**
+     * The name of your graph in Apollo Studio (e.g., docs-example-graph).
+     */
+    'apollo_graph_id' => env('APOLLO_GRAPH_ID'),
+
+    /**
      * The name for the current graph variant.
      */
     'apollo_graph_variant' => env('APOLLO_GRAPH_VARIANT', 'current'),
