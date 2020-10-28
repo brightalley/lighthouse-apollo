@@ -12,7 +12,7 @@ First, install the Composer package:
 
 Next, publish the config file and adjust it as desired:
 
-`php artisan vendor:publish --config lighthouse-apollo`
+`php artisan vendor:publish --provider="BrightAlley\LighthouseApollo\ServiceProvider"`
 
 The service provider for this package is automatically registered. If you have disabled
 auto-discovery of service providers, make sure to add `\BrightAlley\LighthouseApollo\ServiceProvider`
