@@ -8,8 +8,8 @@ use BrightAlley\LighthouseApollo\TracingResult;
 use DateTime;
 use Exception;
 use Google\Protobuf\Timestamp;
-use GraphQL\Error\Error;
 use Illuminate\Contracts\Config\Repository as Config;
+use Illuminate\Support\Arr;
 use Mdg\Report;
 use Mdg\ReportHeader;
 use Mdg\Trace;
@@ -136,8 +136,8 @@ class SendTracingToApollo
             // Add any errors with a matching path.
             $errors = array_map(
                 [$this, 'transformError'],
-                array_filter($tracingResult->errors, function (Error $error) use ($trace) {
-                    return $error->path === $trace['path'];
+                array_filter($tracingResult->errors, function (array $error) use ($trace) {
+                    return isset($error['path']) && $error['path'] === $trace['path'];
                 })
             );
             if (count($errors) > 0) {
@@ -188,8 +188,8 @@ class SendTracingToApollo
         /** @var Trace\Error[] $rootErrors */
         $rootErrors = array_map(
             [$this, 'transformError'],
-            array_filter($tracingResult->errors, function (Error $error) {
-                return empty($error->path);
+            array_filter($tracingResult->errors, function (array $error) use ($tracingResult) {
+                return empty($error['path']) || empty($tracingResult->tracing['execution']['resolvers']);
             })
         );
         $rootNode = $result->getRoot();
@@ -209,14 +209,17 @@ class SendTracingToApollo
     /**
      * Convert a GraphQL error object to a Protobuf error object.
      *
-     * @param Error $error
+     * @param array $error
      * @return Trace\Error
      */
-    private function transformError(Error $error): Trace\Error
+    private function transformError(array $error): Trace\Error
     {
         return new Trace\Error([
-            'message' => $error->message,
-            'json' => json_encode($error->jsonSerialize()),
+            'message' => $error['message'],
+            'locations' => array_map(function (array $location) {
+                return new Trace\Location($location);
+            }, $error['location'] ?? []),
+            'json' => json_encode(Arr::except($error, ['message', 'location'])),
         ]);
     }
 

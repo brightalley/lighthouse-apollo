@@ -32,7 +32,7 @@ class TracingResult
     public array $tracing;
 
     /**
-     * @var Error[]
+     * @var array
      */
     public array $errors;
 
@@ -43,7 +43,7 @@ class TracingResult
      * @param array $client
      * @param array $http
      * @param array $tracing
-     * @param Error[] $errors
+     * @param array $errors
      */
     public function __construct(string $queryText, array $client, array $http, array $tracing, array $errors)
     {

@@ -8,6 +8,8 @@ use BrightAlley\LighthouseApollo\Contracts\ClientInformationExtractor;
 use BrightAlley\LighthouseApollo\Exceptions\InvalidTracingSendMode;
 use BrightAlley\LighthouseApollo\TracingResult;
 use Exception;
+use GraphQL\Error\Error;
+use GraphQL\Error\FormattedError;
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Http\Request;
 use LogicException;
@@ -77,7 +79,9 @@ class ManipulateResultListener
             $this->extractClientInformation(),
             $this->extractHttpInformation(),
             $event->result->extensions['tracing'] ?? [],
-            $event->result->errors ?? []
+            array_map(function (Error $error) {
+                return FormattedError::createFromException($error, $this->config->get('app.debug'));
+            }, $event->result->errors ?? []),
         );
 
         $this->removeTracingFromExtensionsIfNeeded($event);
