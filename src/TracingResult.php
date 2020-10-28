@@ -2,6 +2,8 @@
 
 namespace BrightAlley\LighthouseApollo;
 
+use GraphQL\Error\Error;
+
 class TracingResult
 {
     public string $queryText;
@@ -30,18 +32,25 @@ class TracingResult
     public array $tracing;
 
     /**
+     * @var Error[]
+     */
+    public array $errors;
+
+    /**
      * Constructor.
      *
      * @param string $queryText
      * @param array $client
      * @param array $http
      * @param array $tracing
+     * @param Error[] $errors
      */
-    public function __construct(string $queryText, array $client, array $http, array $tracing)
+    public function __construct(string $queryText, array $client, array $http, array $tracing, array $errors)
     {
         $this->queryText = $queryText;
         $this->client = $client;
         $this->http = $http;
         $this->tracing = $tracing;
+        $this->errors = $errors;
     }
 }

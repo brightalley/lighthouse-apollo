@@ -59,9 +59,15 @@ class ManipulateResultListener
     public function handle(ManipulateResult $event): void
     {
         if (
-            !isset($event->result->extensions['tracing']) ||
             !$this->config->get('lighthouse-apollo.apollo_key') ||
             $this->isIntrospectionQuery($event)
+        ) {
+            return;
+        }
+
+        if (
+            !isset($event->result->extensions['tracing']) &&
+            !isset($event->result->errors)
         ) {
             return;
         }
@@ -70,7 +76,8 @@ class ManipulateResultListener
             $this->request->json('query'),
             $this->extractClientInformation(),
             $this->extractHttpInformation(),
-            $event->result->extensions['tracing']
+            $event->result->extensions['tracing'] ?? [],
+            $event->result->errors ?? []
         );
 
         $this->removeTracingFromExtensionsIfNeeded($event);

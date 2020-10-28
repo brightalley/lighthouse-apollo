@@ -8,6 +8,7 @@ use BrightAlley\LighthouseApollo\TracingResult;
 use DateTime;
 use Exception;
 use Google\Protobuf\Timestamp;
+use GraphQL\Error\Error;
 use Illuminate\Contracts\Config\Repository as Config;
 use Mdg\Report;
 use Mdg\ReportHeader;
@@ -121,6 +122,7 @@ class SendTracingToApollo
             'http' => new Trace\HTTP($tracingResult->http),
             'start_time' => $this->dateTimeStringToTimestampField($tracingResult->tracing['startTime']),
         ]);
+
         foreach ($tracingResult->tracing['execution']['resolvers'] as $trace) {
             $node = new Trace\Node([
                 'end_time' => $trace['startOffset'] + $trace['duration'],
@@ -130,6 +132,17 @@ class SendTracingToApollo
                 'start_time' => $trace['startOffset'],
                 'type' => $trace['returnType'],
             ]);
+
+            // Add any errors with a matching path.
+            $errors = array_map(
+                [$this, 'transformError'],
+                array_filter($tracingResult->errors, function (Error $error) use ($trace) {
+                    return $error->path === $trace['path'];
+                })
+            );
+            if (count($errors) > 0) {
+                $node->setError($errors);
+            }
 
             if (count($trace['path']) === 1) {
                 $result->setRoot($node);
@@ -171,7 +184,40 @@ class SendTracingToApollo
             }
         }
 
+        // Add all errors without a path to the root node.
+        /** @var Trace\Error[] $rootErrors */
+        $rootErrors = array_map(
+            [$this, 'transformError'],
+            array_filter($tracingResult->errors, function (Error $error) {
+                return empty($error->path);
+            })
+        );
+        $rootNode = $result->getRoot();
+        if ($rootNode === null) {
+            $result->setRoot($rootNode = new Trace\Node([
+                'response_name' => '_errors',
+            ]));
+            $rootNode->setError($rootErrors);
+        } else {
+            $existingRootErrors = $rootNode->getError();
+            $rootNode->setError(array_merge($this->iteratorToArray($existingRootErrors), $rootErrors));
+        }
+
         return $result;
+    }
+
+    /**
+     * Convert a GraphQL error object to a Protobuf error object.
+     *
+     * @param Error $error
+     * @return Trace\Error
+     */
+    private function transformError(Error $error): Trace\Error
+    {
+        return new Trace\Error([
+            'message' => $error->message,
+            'json' => json_encode($error->jsonSerialize()),
+        ]);
     }
 
     /**
@@ -184,7 +230,7 @@ class SendTracingToApollo
      */
     private function normalizeQuery(string $query): string
     {
-        $trimmed = preg_replace('/[\r\n\s]+/', ' ', $query);
+        $trimmed = trim(preg_replace('/[\r\n\s]+/', ' ', $query));
         if (preg_match('/^(?:query|mutation) ([\w]+)/', $query, $matches)) {
             return "# ${matches[1]}\n$trimmed";
         }
