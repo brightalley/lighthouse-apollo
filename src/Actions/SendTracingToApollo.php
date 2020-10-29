@@ -216,10 +216,10 @@ class SendTracingToApollo
     {
         return new Trace\Error([
             'message' => $error['message'],
-            'locations' => array_map(function (array $location) {
+            'location' => array_map(function (array $location) {
                 return new Trace\Location($location);
-            }, $error['location'] ?? []),
-            'json' => json_encode(Arr::except($error, ['message', 'location'])),
+            }, $error['locations'] ?? []),
+            'json' => json_encode(Arr::except($error, ['message', 'locations'])),
         ]);
     }
 
