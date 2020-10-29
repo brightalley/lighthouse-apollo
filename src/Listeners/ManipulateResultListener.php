@@ -15,38 +15,44 @@ use Illuminate\Http\Request;
 use LogicException;
 use Mdg\Trace\HTTP\Method;
 use Nuwave\Lighthouse\Events\ManipulateResult;
+use Nuwave\Lighthouse\Execution\GraphQLRequest;
 use Nuwave\Lighthouse\Schema\Source\SchemaSourceProvider;
 
 class ManipulateResultListener
 {
+    private ClientInformationExtractor $clientInformationExtractor;
+
     private Config $config;
 
-    private ClientInformationExtractor $clientInformationExtractor;
+    private GraphQLRequest $graphQlRequest;
+
+    private RedisConnector $redisConnector;
 
     private Request $request;
 
     private SchemaSourceProvider $schemaSourceProvider;
 
-    private RedisConnector $redisConnector;
-
     /**
      * Constructor.
      *
-     * @param Config $config
      * @param ClientInformationExtractor $clientInformationExtractor
+     * @param Config $config
+     * @param GraphQLRequest $graphQlRequest
      * @param RedisConnector $redisConnector
      * @param Request $request
      * @param SchemaSourceProvider $schemaSourceProvider
      */
     public function __construct(
-        Config $config,
         ClientInformationExtractor $clientInformationExtractor,
+        Config $config,
+        GraphQLRequest $graphQlRequest,
         RedisConnector $redisConnector,
         Request $request,
         SchemaSourceProvider $schemaSourceProvider
     ) {
-        $this->config = $config;
         $this->clientInformationExtractor = $clientInformationExtractor;
+        $this->config = $config;
+        $this->graphQlRequest = $graphQlRequest;
         $this->redisConnector = $redisConnector;
         $this->request = $request;
         $this->schemaSourceProvider = $schemaSourceProvider;
@@ -75,7 +81,7 @@ class ManipulateResultListener
         }
 
         $trace = new TracingResult(
-            $this->request->json('query'),
+            $this->graphQlRequest->query(),
             $this->extractClientInformation(),
             $this->extractHttpInformation(),
             $event->result->extensions['tracing'] ?? [],
@@ -156,6 +162,6 @@ class ManipulateResultListener
 
     private function isIntrospectionQuery(): bool
     {
-        return preg_match('/^\s*query[^{]*{\s*(\w+:\s*)?__schema\s*{/', $this->request->json('query'));
+        return (bool) preg_match('/^\s*query[^{]*{\s*(\w+:\s*)?__schema\s*{/', $this->graphQlRequest->query());
     }
 }
