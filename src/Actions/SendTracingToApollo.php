@@ -192,6 +192,7 @@ class SendTracingToApollo
                 return empty($error['path']) || empty($tracingResult->tracing['execution']['resolvers']);
             })
         );
+        /** @var Trace\Node|null $rootNode */
         $rootNode = $result->getRoot();
         if ($rootNode === null) {
             $result->setRoot($rootNode = new Trace\Node([

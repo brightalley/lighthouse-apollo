@@ -38,7 +38,7 @@ class ServiceProvider extends BaseServiceProvider
     private function bootForConsole(): void
     {
         $this->publishes([
-            __DIR__ . '/../config/lighthouse-apollo.php' => config_path('lighthouse-apollo.php')
+            __DIR__ . '/../config/lighthouse-apollo.php' => $this->app->configPath('lighthouse-apollo.php')
         ], 'lighthouse-apollo');
 
         $this->commands([

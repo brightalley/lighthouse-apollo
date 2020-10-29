@@ -14,16 +14,17 @@ class TracingResult
 
     /**
      * @var array{
-     *     duration: int
-     *     endTime: string
-     *     startTime: string
-     *     version: int
+     *     duration: int,
+     *     endTime: string,
+     *     startTime: string,
+     *     version: int,
      *     execution: array{
      *         resolvers: array{
-     *             duration: int
-     *             parentType: string
-     *             path: string
-     *             returnType: string
+     *             duration: int,
+     *             fieldName: string,
+     *             parentType: string,
+     *             path: (int|string)[],
+     *             returnType: string,
      *             startOffset: int
      *         }[]
      *     }

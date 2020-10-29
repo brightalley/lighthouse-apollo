@@ -98,7 +98,7 @@ EOT;
 
         $response = ($this->sendSchemaToApollo($variables));
         if (!empty($response['errors'])) {
-            throw new RegisterSchemaFailedException(implode(', ', array_map(function ($error) {
+            throw new RegisterSchemaFailedException(implode(', ', array_map(function (array $error): string {
                 return $error['message'];
             }, $response['errors'])));
         }
@@ -110,7 +110,7 @@ EOT;
     }
 
     /**
-     * @param array $variables
+     * @param UploadSchemaVariables $variables
      * @return array
      * @throws RegisterSchemaRequestFailedException
      * @throws JsonException
@@ -135,7 +135,7 @@ EOT;
         $response = curl_exec($request);
 
         $errorCode = curl_errno($request);
-        if ($errorCode) {
+        if ($errorCode || !is_string($response)) {
             throw new RegisterSchemaRequestFailedException($errorCode, curl_error($request));
         }
 

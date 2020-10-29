@@ -6,6 +6,12 @@ use Illuminate\Contracts\Support\Arrayable;
 
 trait ArrayableTrait
 {
+    /**
+     * Convert a field to something for an array.
+     *
+     * @param mixed $field
+     * @return mixed
+     */
     private function mapField($field)
     {
         if ($field instanceof Arrayable) {
@@ -24,6 +30,11 @@ trait ArrayableTrait
         return $field;
     }
 
+    /**
+     * Get the instance as an array.
+     *
+     * @return array
+     */
     public function toArray(): array
     {
         return array_map([$this, 'mapField'], get_object_vars($this));

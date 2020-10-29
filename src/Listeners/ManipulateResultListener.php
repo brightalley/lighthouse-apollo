@@ -75,7 +75,7 @@ class ManipulateResultListener
 
         if (
             !isset($event->result->extensions['tracing']) &&
-            !isset($event->result->errors)
+            !count($event->result->errors)
         ) {
             return;
         }
@@ -87,7 +87,7 @@ class ManipulateResultListener
             $event->result->extensions['tracing'] ?? [],
             array_map(function (Error $error) {
                 return FormattedError::createFromException($error, true);
-            }, $event->result->errors ?? []),
+            }, $event->result->errors),
         );
 
         $this->removeTracingFromExtensionsIfNeeded($event);
@@ -100,19 +100,14 @@ class ManipulateResultListener
                         ->send();
                 } catch (Exception $e) {
                     // We should probably not cause pain for the end users. Just include this in the extensions instead.
-                    if (!isset($event->result->extensions['errors'])) {
-                        $event->result->extensions['errors'] = [];
-                    }
-
-                    $event->result->extensions['errors'][] = [
-                        'message' => $e->getMessage(),
-                        'extensions' => array_merge([
-                            'type' => get_class($e),
-                            'code' => $e->getCode(),
-                        ], $this->config->get('app.debug') ? [
-                            'trace' => $e->getTraceAsString(),
-                        ] : []),
-                    ];
+                    $event->result->errors[] = new Error(
+                        'Failed to send tracing to Apollo',
+                        null,
+                        null,
+                        null,
+                        null,
+                        $e
+                    );
                 }
                 break;
             case 'redis':
