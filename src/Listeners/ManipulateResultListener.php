@@ -80,7 +80,7 @@ class ManipulateResultListener
             $this->extractHttpInformation(),
             $event->result->extensions['tracing'] ?? [],
             array_map(function (Error $error) {
-                return FormattedError::createFromException($error, $this->config->get('app.debug'));
+                return FormattedError::createFromException($error, true);
             }, $event->result->errors ?? []),
         );
 
