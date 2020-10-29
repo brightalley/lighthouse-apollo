@@ -4,6 +4,11 @@ This library allows integrating your Lighthouse GraphQL project with Apollo Stud
 sending tracing statistics and allowing you to send your schema to Apollo for 
 breaking changes notifications.
 
+## Requirements
+
+- PHP 7.4 or newer
+- Tested with Laravel 8 and Lighthouse 4.17
+
 ## Installation
 
 First, install the Composer package:
@@ -33,10 +38,20 @@ public function schedule(\Illuminate\Console\Scheduling\Schedule $schedule)
 }
 ```
 
-## Requirements
+## Client tracing
 
-- PHP 7.4 or newer
-- Tested with Laravel 8 and Lighthouse 4.17
+You can gather information about which clients are calling your GraphQL API. If you have
+control over the clients, add the `x-apollo-client-name` and `x-apollo-client-version` 
+headers to your GraphQL requests, and they will be gathered and sent to Apollo Studio.
+
+If you need more control over client tracing on the server side, you can create your own
+custom logic by implementing the `BrightAlley\LighthouseApollo\Contracts\ClientInformationExtractor`
+interface, and binding your own implementation to the app container in your service
+provider, like so:
+
+```php
+$this->app->bind(ClientInformationExtractor::class, MyCustomClientInformationExtractor::class);
+```
 
 ## Development
 
