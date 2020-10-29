@@ -62,7 +62,7 @@ class ManipulateResultListener
     {
         if (
             !$this->config->get('lighthouse-apollo.apollo_key') ||
-            $this->isIntrospectionQuery($event)
+            $this->isIntrospectionQuery()
         ) {
             return;
         }
@@ -154,8 +154,8 @@ class ManipulateResultListener
         }
     }
 
-    private function isIntrospectionQuery(ManipulateResult $event): bool
+    private function isIntrospectionQuery(): bool
     {
-        return ($event->result->extensions['tracing']['execution']['resolvers'][0]['fieldName'] ?? '') === '__schema';
+        return preg_match('/^\s*query[^{]*{\s*(\w+:\s*)?__schema\s*{/', $this->request->json('query'));
     }
 }
