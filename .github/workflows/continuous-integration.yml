@@ -47,3 +47,6 @@ jobs:
 
       - name: "Run psalm"
         run: "vendor/bin/psalm"
+
+      - name: "Run phpunit"
+        run: "vendor/bin/phpunit"
