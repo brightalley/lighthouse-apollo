@@ -58,7 +58,7 @@ class SendTracingToApollo
                 $tracesPerQuery[$querySignature] = [];
             }
 
-            $tracesPerQuery[$querySignature][] = $this->transformTracing($trace);
+            $tracesPerQuery[$querySignature][] = $trace->getTracingAsProtobuf();
         }
 
         $tracesPerQuery = array_map(static function (array $tracesAndStats): TracesAndStats {
@@ -102,129 +102,6 @@ class SendTracingToApollo
     }
 
     /**
-     * Convert Lighthouse's tracing results to a tree structure that Apollo Studio understands.
-     *
-     * @param TracingResult $tracingResult
-     * @return Trace
-     * @throws Exception
-     */
-    private function transformTracing(TracingResult $tracingResult): Trace
-    {
-        // Lighthouse's format is not fully compatible with what Apollo expects.
-        // In particular, Apollo expects a sort of tree structure, whereas Lighthouse produces a flat array.
-        $result = new Trace([
-            'client_address' => $tracingResult->client['address'],
-            'client_name' => $tracingResult->client['name'],
-            'client_reference_id' => $tracingResult->client['reference_id'],
-            'client_version' => $tracingResult->client['version'],
-            'duration_ns' => $tracingResult->tracing['duration'],
-            'end_time' => $this->dateTimeStringToTimestampField($tracingResult->tracing['endTime']),
-            'http' => new Trace\HTTP($tracingResult->http),
-            'start_time' => $this->dateTimeStringToTimestampField($tracingResult->tracing['startTime']),
-        ]);
-
-        foreach ($tracingResult->tracing['execution']['resolvers'] as $trace) {
-            $node = new Trace\Node([
-                'end_time' => $trace['startOffset'] + $trace['duration'],
-                'original_field_name' => $trace['fieldName'],
-                'parent_type' => $trace['parentType'],
-                'response_name' => $trace['path'][count($trace['path']) - 1],
-                'start_time' => $trace['startOffset'],
-                'type' => $trace['returnType'],
-            ]);
-
-            // Add any errors with a matching path.
-            $errors = array_map(
-                [$this, 'transformError'],
-                array_filter($tracingResult->errors, function (array $error) use ($trace) {
-                    return isset($error['path']) && $error['path'] === $trace['path'];
-                })
-            );
-            if (count($errors) > 0) {
-                $node->setError($errors);
-            }
-
-            if (count($trace['path']) === 1) {
-                $result->setRoot($node);
-            } else {
-                /** @var Trace\Node $target */
-                $target = $result->getRoot();
-                foreach (array_slice($trace['path'], 1, -1) as $pathSegment) {
-                    if ($pathSegment === 0) {
-                        $matchingIndex = null;
-                        foreach ($target->getChild() as $child) {
-                            if ($child->getIndex() === $pathSegment) {
-                                $matchingIndex = $child;
-                                break;
-                            }
-                        }
-
-                        if ($matchingIndex !== null) {
-                            $target = $matchingIndex;
-                        } else {
-                            $child = $target->getChild();
-                            $indexNode = new Trace\Node(['index' => $pathSegment]);
-                            $target->setChild(array_merge($this->iteratorToArray($child), [$indexNode]));
-
-                            $target = $indexNode;
-                        }
-                    } else {
-                        /** @var Trace\Node $child */
-                        foreach ($target->getChild() as $child) {
-                            if ($child->getResponseName() === $pathSegment) {
-                                $target = $child;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                $child = $target->getChild();
-                $target->setChild(array_merge($this->iteratorToArray($child), [$node]));
-            }
-        }
-
-        // Add all errors without a path to the root node.
-        /** @var Trace\Error[] $rootErrors */
-        $rootErrors = array_map(
-            [$this, 'transformError'],
-            array_filter($tracingResult->errors, function (array $error) use ($tracingResult) {
-                return empty($error['path']) || empty($tracingResult->tracing['execution']['resolvers']);
-            })
-        );
-        /** @var Trace\Node|null $rootNode */
-        $rootNode = $result->getRoot();
-        if ($rootNode === null) {
-            $result->setRoot($rootNode = new Trace\Node([
-                'response_name' => '_errors',
-            ]));
-            $rootNode->setError($rootErrors);
-        } else {
-            $existingRootErrors = $rootNode->getError();
-            $rootNode->setError(array_merge($this->iteratorToArray($existingRootErrors), $rootErrors));
-        }
-
-        return $result;
-    }
-
-    /**
-     * Convert a GraphQL error object to a Protobuf error object.
-     *
-     * @param array $error
-     * @return Trace\Error
-     */
-    private function transformError(array $error): Trace\Error
-    {
-        return new Trace\Error([
-            'message' => $error['message'],
-            'location' => array_map(function (array $location) {
-                return new Trace\Location($location);
-            }, $error['locations'] ?? []),
-            'json' => json_encode(Arr::except($error, ['message', 'locations'])),
-        ]);
-    }
-
-    /**
      * Try to "normalize" the GraphQL query, by stripping whitespace. This function could be made
      * more intelligent in the future. Also adds the required "# OperationName" on the first line
      * before the rest of the query.
@@ -243,36 +120,4 @@ class SendTracingToApollo
         return "# ${hash}\n$trimmed";
     }
 
-    /**
-     * Turn an iterable into an array.
-     *
-     * @template T
-     * @param iterable<T> $iter
-     * @return array<T>
-     */
-    private function iteratorToArray(iterable $iter): array
-    {
-        $result = [];
-        foreach ($iter as $element) {
-            $result[] = $element;
-        }
-
-        return $result;
-    }
-
-    /**
-     * Create a new Protobuf timestamp field from the given datetime string, which was produced
-     * earlier by Lighthouse.
-     *
-     * @param string $dateTime
-     * @return Timestamp
-     * @throws Exception
-     */
-    private function dateTimeStringToTimestampField(string $dateTime): Timestamp
-    {
-        $timestamp = new Timestamp();
-        $timestamp->fromDateTime(new DateTime($dateTime));
-
-        return $timestamp;
-    }
 }

@@ -8,6 +8,7 @@ use BrightAlley\LighthouseApollo\Contracts\ClientInformationExtractor;
 use BrightAlley\LighthouseApollo\Exceptions\InvalidTracingSendMode;
 use BrightAlley\LighthouseApollo\TracingResult;
 use Exception;
+use GraphQL\Error\Debug;
 use GraphQL\Error\Error;
 use GraphQL\Error\FormattedError;
 use Illuminate\Contracts\Config\Repository as Config;
@@ -20,6 +21,8 @@ use Nuwave\Lighthouse\Schema\Source\SchemaSourceProvider;
 
 class ManipulateResultListener
 {
+    public const DEBUG_FLAGS = Debug::INCLUDE_DEBUG_MESSAGE | Debug::INCLUDE_TRACE;
+
     private ClientInformationExtractor $clientInformationExtractor;
 
     private Config $config;
@@ -86,7 +89,7 @@ class ManipulateResultListener
             $this->extractHttpInformation(),
             $event->result->extensions['tracing'] ?? [],
             array_map(function (Error $error) {
-                return FormattedError::createFromException($error, true);
+                return FormattedError::createFromException($error, self::DEBUG_FLAGS);
             }, $event->result->errors),
         );
 
