@@ -119,5 +119,4 @@ class SendTracingToApollo
         $hash = sha1($trimmed);
         return "# ${hash}\n$trimmed";
     }
-
 }
