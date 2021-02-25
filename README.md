@@ -13,7 +13,7 @@ breaking changes notifications.
 
 First, install the Composer package:
 
-`composer require bright-ally/lighthouse-apollo`
+`composer require bright-alley/lighthouse-apollo`
 
 Next, publish the config file and adjust it as desired:
 
