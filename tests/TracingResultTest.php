@@ -15,6 +15,7 @@ use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Schema;
 use Illuminate\Support\Str;
 use Mdg\Trace\HTTP\Method;
+use Mdg\Trace\HTTP\Values;
 use Nuwave\Lighthouse\Events\BuildExtensionsResponse;
 use Nuwave\Lighthouse\Events\StartExecution;
 use Nuwave\Lighthouse\Events\StartRequest;
@@ -41,6 +42,9 @@ class TracingResultTest extends TestCase
             'path' => '/graphql',
             'status_code' => 200,
             'secure' => true,
+            'request_headers' => [
+                'user-agent' => new Values(['value' => ['Foo']]),
+            ],
         ];
     }
 

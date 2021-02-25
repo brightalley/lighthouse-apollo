@@ -13,8 +13,10 @@ use GraphQL\Error\Error;
 use GraphQL\Error\FormattedError;
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use LogicException;
 use Mdg\Trace\HTTP\Method;
+use Mdg\Trace\HTTP\Values;
 use Nuwave\Lighthouse\Events\ManipulateResult;
 use Nuwave\Lighthouse\Execution\GraphQLRequest;
 use Nuwave\Lighthouse\Schema\Source\SchemaSourceProvider;
@@ -137,18 +139,20 @@ class ManipulateResultListener
     {
         // These keys should correspond with Protobuf's HTTP object.
         /** {@see \Mdg\Trace\HTTP} */
-        return [
+        return array_merge([
             'method' => Method::value($this->request->method()),
             'host' => $this->request->getHost(),
             'path' => $this->request->path(),
             'secure' => $this->request->secure(),
             'protocol' => $this->request->getProtocolVersion(),
-            // TODO: Include request headers. These need an extra transformation before sending.
-            // 'request_headers' => Arr::except(
-            //     $this->request->headers->all(),
-            //     $this->config->get('lighthouse-apollo.excluded_request_headers')
-            // ),
-        ];
+        ], $this->config->get('lighthouse-apollo.include_request_headers') ? [
+            'request_headers' => array_map(function ($value) {
+                return new Values(['value' => [$value]]);
+            }, Arr::except(
+                $this->request->headers->all(),
+                $this->config->get('lighthouse-apollo.excluded_request_headers')
+            )),
+        ] : []);
     }
 
     private function removeTracingFromExtensionsIfNeeded(ManipulateResult $event): void

@@ -54,7 +54,12 @@ return [
     'mute_tracing_extensions' => env('APP_DEBUG', false) !== true,
 
     /**
+     * Whether to send the request headers to Apollo Studio.
+     */
+    'include_request_headers' => true,
+
+    /**
      * Which request headers to not include in the HTTP information for a tracing. Should be lowercase.
      */
-    'excluded_request_headers' => ['authentication'],
+    'excluded_request_headers' => ['authentication', 'cookie', 'set-cookie'],
 ];
