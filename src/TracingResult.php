@@ -81,7 +81,7 @@ class TracingResult
         $tracingData = [
             'duration_ns' => $this->tracing['duration'],
             'end_time' => $this->dateTimeStringToTimestampField($this->tracing['endTime']),
-            'http' => new Trace\HTTP($this->http),
+            'http' => $this->getHttpAsProtobuf(),
             'start_time' => $this->dateTimeStringToTimestampField($this->tracing['startTime']),
         ];
         if (!empty($this->client['address'])) {
@@ -236,5 +236,17 @@ class TracingResult
         }
 
         return $result;
+    }
+
+    protected function getHttpAsProtobuf(): Trace\HTTP
+    {
+        $http = $this->http;
+        if (isset($http['request_headers'])) {
+            $http['request_headers'] = array_map(function (array $values) {
+                return new Trace\HTTP\Values(['value' => $values]);
+            }, $http['request_headers']);
+        }
+
+        return new Trace\HTTP($http);
     }
 }

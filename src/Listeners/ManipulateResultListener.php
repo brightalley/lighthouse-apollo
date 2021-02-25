@@ -148,12 +148,10 @@ class ManipulateResultListener
             'secure' => $this->request->secure(),
             'protocol' => $this->request->getProtocolVersion(),
         ], $this->config->get('lighthouse-apollo.include_request_headers') ? [
-            'request_headers' => array_map(function ($value) {
-                return new Values(['value' => [$value]]);
-            }, Arr::except(
+            'request_headers' => Arr::except(
                 $this->request->headers->all(),
                 $this->config->get('lighthouse-apollo.excluded_request_headers')
-            )),
+            ),
         ] : []);
     }
 

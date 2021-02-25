@@ -6,16 +6,13 @@ use BrightAlley\LighthouseApollo\Listeners\ManipulateResultListener;
 use BrightAlley\LighthouseApollo\TracingResult;
 use BrightAlley\Tests\Support\QueryType;
 use Exception;
-use GraphQL\Error\Debug;
 use GraphQL\Error\Error;
 use GraphQL\Error\FormattedError;
-use GraphQL\Error\InvariantViolation;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Schema;
 use Illuminate\Support\Str;
 use Mdg\Trace\HTTP\Method;
-use Mdg\Trace\HTTP\Values;
 use Nuwave\Lighthouse\Events\BuildExtensionsResponse;
 use Nuwave\Lighthouse\Events\StartExecution;
 use Nuwave\Lighthouse\Events\StartRequest;
@@ -43,7 +40,7 @@ class TracingResultTest extends TestCase
             'status_code' => 200,
             'secure' => true,
             'request_headers' => [
-                'user-agent' => new Values(['value' => ['Foo']]),
+                'user-agent' => ['Foo'],
             ],
         ];
     }
