@@ -62,4 +62,20 @@ return [
      * Which request headers to not include in the HTTP information for a tracing. Should be lowercase.
      */
     'excluded_request_headers' => ['authentication', 'cookie', 'set-cookie'],
+
+    /**
+     * Whether to send query/mutation variables to Apollo Studio.
+     */
+    'include_variables' => true,
+
+    /**
+     * Which variables to include if include_variables is true. If `variables_only_names` has any values,
+     * only variables with those names will be sent, the rest will be masked in the variables sent to
+     * Apollo. If `variables_except_names` has any values, those will be masked.
+     * The `except` setting has greater priority than `only`. In other words, if a key such as 'token' is
+     * present in both only `variables_only_names` and in `variables_except_names`, the value will still
+     * be masked.
+     */
+    'variables_only_names' => [],
+    'variables_except_names' => ['password', 'username', 'email', 'token'],
 ];

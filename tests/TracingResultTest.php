@@ -86,6 +86,7 @@ class TracingResultTest extends TestCase
     {
         $tracing = new TracingResult(
             '{ hello }',
+            null,
             $this->sampleClientData(),
             $this->sampleHttpData(),
             $this->sampleTracingData(),
@@ -96,6 +97,25 @@ class TracingResultTest extends TestCase
         self::assertNotNull($proto->getRoot());
         self::assertCount(0, $proto->getRoot()->getChild());
         self::assertEquals('phpunit', $proto->getClientName());
+    }
+
+    /**
+     * @covers \BrightAlley\LighthouseApollo\TracingResult::getTracingAsProtobuf
+     */
+    public function testGetTracingAsProtobufWithVariables(): void
+    {
+        $tracing = new TracingResult(
+            '{ hello }',
+            ['key' => json_encode('value', JSON_THROW_ON_ERROR)],
+            $this->sampleClientData(),
+            $this->sampleHttpData(),
+            $this->sampleTracingData(),
+            []
+        );
+        $proto = $tracing->getTracingAsProtobuf();
+
+        self::assertNotNull($proto->getDetails());
+        self::assertNotNull($proto->getDetails()->getVariablesJson());
     }
 
     public function nullableClientFields(): array
@@ -117,6 +137,7 @@ class TracingResultTest extends TestCase
     {
         $tracing = new TracingResult(
             '{ hello }',
+            null,
             array_merge($this->sampleClientData(), $clientData),
             $this->sampleHttpData(),
             $this->sampleTracingData(),
@@ -138,6 +159,7 @@ class TracingResultTest extends TestCase
         // Top level error should show up on root.
         $tracing = new TracingResult(
             '{ hello }',
+            null,
             $this->sampleClientData(),
             $this->sampleHttpData(),
             $this->sampleTracingData(),
@@ -171,6 +193,7 @@ class TracingResultTest extends TestCase
         ];
         $tracing = new TracingResult(
             '{ hello { world } }',
+            null,
             $this->sampleClientData(),
             $this->sampleHttpData(),
             $tracingData,

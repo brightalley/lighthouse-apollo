@@ -11,6 +11,8 @@ class TracingResult
 {
     public string $queryText;
 
+    public ?array $variables;
+
     public array $client;
 
     public array $http;
@@ -44,14 +46,16 @@ class TracingResult
      * Constructor.
      *
      * @param string $queryText
+     * @param array|null $variables
      * @param array $client
      * @param array $http
      * @param array $tracing
      * @param array $errors
      */
-    public function __construct(string $queryText, array $client, array $http, array $tracing, array $errors)
+    public function __construct(string $queryText, ?array $variables, array $client, array $http, array $tracing, array $errors)
     {
         $this->queryText = $queryText;
+        $this->variables = $variables;
         $this->client = $client;
         $this->http = $http;
         $this->tracing = $tracing;
@@ -86,6 +90,12 @@ class TracingResult
         if (!empty($this->client['version'])) {
             $tracingData['client_version'] = $this->client['version'];
         }
+        if ($this->variables !== null) {
+            $tracingData['details'] = new Trace\Details([
+                'variables_json' => $this->variables,
+            ]);
+        }
+
         $result = new Trace($tracingData);
 
         foreach ($this->tracing['execution']['resolvers'] as $trace) {

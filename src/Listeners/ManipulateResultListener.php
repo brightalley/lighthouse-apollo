@@ -14,6 +14,7 @@ use GraphQL\Error\FormattedError;
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use JsonException;
 use LogicException;
 use Mdg\Trace\HTTP\Method;
 use Mdg\Trace\HTTP\Values;
@@ -87,6 +88,7 @@ class ManipulateResultListener
 
         $trace = new TracingResult(
             $this->graphQlRequest->query(),
+            $this->variables(),
             $this->extractClientInformation(),
             $this->extractHttpInformation(),
             $event->result->extensions['tracing'] ?? [],
@@ -165,5 +167,39 @@ class ManipulateResultListener
     private function isIntrospectionQuery(): bool
     {
         return (bool) preg_match('/^\s*query[^{]*{\s*(\w+:\s*)?__schema\s*{/', $this->graphQlRequest->query());
+    }
+
+    private function variables(): ?array
+    {
+        if (!$this->config->get('lighthouse-apollo.include_variables')) {
+            return null;
+        }
+
+        $variables = [];
+        /** @var string[] $only */
+        $only = $this->config->get('lighthouse-apollo.variables_only_names');
+        /** @var string[] $except */
+        $except = $this->config->get('lighthouse-apollo.variables_except_names');
+        foreach ($this->graphQlRequest->variables() as $key => $value) {
+            if (
+                (count($only) > 0 && !in_array($key, $only, true)) ||
+                (count($except) > 0 && in_array($key, $except, true))
+            ) {
+                // Special case for private variables. Note that this is a different
+                // representation from a variable containing the empty string, as that
+                // will be sent as '""'.
+                $value = '';
+            } else {
+                try {
+                    $value = json_encode($value, JSON_THROW_ON_ERROR);
+                } catch (JsonException $e) {
+                    $value = '"[Unable to convert value to JSON]"';
+                }
+            }
+
+            $variables[$key] = $value;
+        }
+
+        return $variables;
     }
 }
