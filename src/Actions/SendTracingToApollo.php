@@ -53,7 +53,7 @@ class SendTracingToApollo
         // Convert tracings to map of query signature => traces.
         $tracesPerQuery = [];
         foreach ($this->tracing as $trace) {
-            $querySignature = $this->normalizeQuery($trace->queryText);
+            $querySignature = $this->normalizeQuery($trace->queryText, $trace->operationName);
             if (!isset($tracesPerQuery[$querySignature])) {
                 $tracesPerQuery[$querySignature] = [];
             }
@@ -107,11 +107,16 @@ class SendTracingToApollo
      * before the rest of the query.
      *
      * @param string $query
+     * @param string|null $operationName
      * @return string
      */
-    private function normalizeQuery(string $query): string
+    private function normalizeQuery(string $query, ?string $operationName): string
     {
         $trimmed = trim(preg_replace('/[\r\n\s]+/', ' ', $query));
+        if ($operationName !== null) {
+            return "# $operationName\n$trimmed";
+        }
+
         if (preg_match('/^(?:query|mutation) ([\w]+)/', $query, $matches)) {
             return "# ${matches[1]}\n$trimmed";
         }

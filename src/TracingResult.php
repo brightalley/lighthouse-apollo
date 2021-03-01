@@ -13,6 +13,8 @@ class TracingResult
 
     public ?array $variables;
 
+    public ?string $operationName;
+
     public array $client;
 
     public array $http;
@@ -47,6 +49,7 @@ class TracingResult
      *
      * @param string $queryText
      * @param array|null $variables
+     * @param string|null $operationName
      * @param array $client
      * @param array $http
      * @param array $tracing
@@ -55,6 +58,7 @@ class TracingResult
     public function __construct(
         string $queryText,
         ?array $variables,
+        ?string $operationName,
         array $client,
         array $http,
         array $tracing,
@@ -62,6 +66,7 @@ class TracingResult
     ) {
         $this->queryText = $queryText;
         $this->variables = $variables;
+        $this->operationName = $operationName;
         $this->client = $client;
         $this->http = $http;
         $this->tracing = $tracing;

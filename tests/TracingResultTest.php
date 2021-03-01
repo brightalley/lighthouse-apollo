@@ -8,6 +8,7 @@ use BrightAlley\Tests\Support\QueryType;
 use Exception;
 use GraphQL\Error\Error;
 use GraphQL\Error\FormattedError;
+use GraphQL\Type\Definition\FieldDefinition;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Schema;
@@ -54,9 +55,11 @@ class TracingResultTest extends TestCase
         $now = microtime(true);
         $tracing->record(
             new ResolveInfo(
-                'hello',
+                FieldDefinition::create([
+                    'name' => 'hello',
+                    'type' => new StringType(),
+                ]),
                 [],
-                new StringType(),
                 $queryType = new QueryType(),
                 ['hello'],
                 new Schema(['query' => $queryType]),
@@ -84,6 +87,7 @@ class TracingResultTest extends TestCase
         $tracing = new TracingResult(
             '{ hello }',
             null,
+            null,
             $this->sampleClientData(),
             $this->sampleHttpData(),
             $this->sampleTracingData(),
@@ -104,6 +108,7 @@ class TracingResultTest extends TestCase
         $tracing = new TracingResult(
             '{ hello }',
             ['key' => json_encode('value', JSON_THROW_ON_ERROR)],
+            null,
             $this->sampleClientData(),
             $this->sampleHttpData(),
             $this->sampleTracingData(),
@@ -135,6 +140,7 @@ class TracingResultTest extends TestCase
         $tracing = new TracingResult(
             '{ hello }',
             null,
+            null,
             array_merge($this->sampleClientData(), $clientData),
             $this->sampleHttpData(),
             $this->sampleTracingData(),
@@ -157,6 +163,7 @@ class TracingResultTest extends TestCase
         $tracing = new TracingResult(
             '{ hello }',
             null,
+            null,
             $this->sampleClientData(),
             $this->sampleHttpData(),
             $this->sampleTracingData(),
@@ -165,7 +172,7 @@ class TracingResultTest extends TestCase
                     'some error',
                     null,
                     null,
-                    null,
+                    [],
                     null,
                     new Exception('internal error message')
                 ),
@@ -191,6 +198,7 @@ class TracingResultTest extends TestCase
         $tracing = new TracingResult(
             '{ hello { world } }',
             null,
+            null,
             $this->sampleClientData(),
             $this->sampleHttpData(),
             $tracingData,
@@ -199,7 +207,7 @@ class TracingResultTest extends TestCase
                     'some error',
                     null,
                     null,
-                    null,
+                    [],
                     ['hello', 'world'],
                     new Exception('internal error message')
                 ),

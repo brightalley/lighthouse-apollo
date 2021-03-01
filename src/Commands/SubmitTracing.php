@@ -66,6 +66,7 @@ class SubmitTracing extends Command
      */
     public function handle(): void
     {
+        /** @var string $sendTracingMode */
         $sendTracingMode = $this->config->get('lighthouse-apollo.send_tracing_mode');
         switch ($sendTracingMode) {
             case 'sync':
