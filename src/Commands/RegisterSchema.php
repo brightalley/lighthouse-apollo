@@ -53,7 +53,7 @@ EOT;
     /**
      * The console command description.
      *
-     * @var string|null
+     * @var string
      */
     protected $description = 'Send the current schema to Apollo Studio';
 

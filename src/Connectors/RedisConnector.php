@@ -40,7 +40,7 @@ class RedisConnector
     /**
      * Add multiple tracing results to the redis queue.
      *
-     * @param TracingResult[] $tracings
+     * @param array<int,TracingResult> $tracings
      */
     public function putMany(array $tracings): void
     {
@@ -50,7 +50,7 @@ class RedisConnector
     }
 
     /**
-     * @return TracingResult[]
+     * @return array<int,TracingResult>
      */
     public function getPending(): array
     {

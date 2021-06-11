@@ -24,7 +24,7 @@ class SubmitTracing extends Command
     /**
      * The console command description.
      *
-     * @var string|null
+     * @var string
      */
     protected $description = 'Send the pending tracing results from Redis or the database to Apollo Studio.';
 
