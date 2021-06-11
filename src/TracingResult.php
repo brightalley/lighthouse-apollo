@@ -131,7 +131,7 @@ class TracingResult
                 /** @var Trace\Node $target */
                 $target = $result->getRoot();
                 foreach (array_slice($trace['path'], 1, -1) as $pathSegment) {
-                    if ($pathSegment === 0) {
+                    if (is_numeric($pathSegment)) {
                         $matchingIndex = null;
                         foreach ($target->getChild() as $child) {
                             if ($child->getIndex() === $pathSegment) {
