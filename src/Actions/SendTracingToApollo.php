@@ -19,7 +19,7 @@ use Nuwave\Lighthouse\Schema\Source\SchemaSourceProvider;
 class SendTracingToApollo
 {
     /**
-     * @var TracingResult[]
+     * @var array<int,TracingResult>
      */
     private array $tracing;
 
@@ -32,7 +32,7 @@ class SendTracingToApollo
      *
      * @param Config $config
      * @param SchemaSourceProvider $schemaSourceProvider
-     * @param TracingResult[] $tracing
+     * @param array<int,TracingResult> $tracing
      */
     public function __construct(Config $config, SchemaSourceProvider $schemaSourceProvider, array $tracing)
     {

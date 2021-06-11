@@ -45,15 +45,11 @@ EOT;
 
     /**
      * The name and signature of the console command.
-     *
-     * @var string
      */
     protected $signature = 'lighthouse-apollo:register-schema';
 
     /**
      * The console command description.
-     *
-     * @var string|null
      */
     protected $description = 'Send the current schema to Apollo Studio';
 
