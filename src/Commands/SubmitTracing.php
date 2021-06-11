@@ -16,30 +16,18 @@ class SubmitTracing extends Command
 {
     /**
      * The name and signature of the console command.
-     *
-     * @var string
      */
     protected $signature = 'lighthouse-apollo:submit-tracing';
 
     /**
      * The console command description.
-     *
-     * @var string
      */
     protected $description = 'Send the pending tracing results from Redis or the database to Apollo Studio.';
 
-    /**
-     * @var Config
-     */
     private Config $config;
 
-    /**
-     * @var SchemaSourceProvider
-     */
     private SchemaSourceProvider $schemaSourceProvider;
-    /**
-     * @var RedisConnector
-     */
+
     private RedisConnector $redisConnector;
 
     /**
