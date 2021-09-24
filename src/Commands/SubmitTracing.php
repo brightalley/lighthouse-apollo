@@ -52,31 +52,28 @@ class SubmitTracing extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(): int
     {
         /** @var string $sendTracingMode */
         $sendTracingMode = $this->config->get('lighthouse-apollo.send_tracing_mode');
         switch ($sendTracingMode) {
             case 'sync':
                 $this->output->writeln('Send tracing mode is set to "sync", nothing to do.');
-                break;
+                return 0;
             case 'redis':
-                $this->handleFromRedis();
-                break;
+                return $this->handleFromRedis();
             default:
                 $this->output->error('Tracing mode "' . $sendTracingMode . '" is not supported.');
+                return 1;
         }
-
-        $this->output->writeln('All done!');
     }
 
-    private function handleFromRedis(): void
+    private function handleFromRedis(): int
     {
         $tracings = $this->redisConnector->getPending();
         if (count($tracings) === 0) {
             $this->output->warning('No pending tracings on Redis.');
-
-            return;
+            return 0;
         }
 
         $this->output->writeln('Sending ' . count($tracings) . ' tracing(s) to Apollo Studio');
@@ -90,6 +87,10 @@ class SubmitTracing extends Command
 
             // Put the tracings back on the queue.
             $this->redisConnector->putMany($tracings);
+            return 1;
         }
+
+        $this->output->writeln('All done!');
+        return 0;
     }
 }
