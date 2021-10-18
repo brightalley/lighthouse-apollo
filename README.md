@@ -34,7 +34,7 @@ You can adjust the schedule to run more or less often based on your traffic volu
 public function schedule(\Illuminate\Console\Scheduling\Schedule $schedule)
 {
     $schedule->command('lighthouse-apollo:submit-tracing')
-        ->everyFiveMinutes();
+        ->everyMinute();
 }
 ```
 
