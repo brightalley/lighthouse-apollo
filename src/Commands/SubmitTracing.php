@@ -26,8 +26,6 @@ class SubmitTracing extends Command
 
     private Config $config;
 
-    private SchemaSourceProvider $schemaSourceProvider;
-
     private RedisConnector $redisConnector;
 
     /**
@@ -45,7 +43,6 @@ class SubmitTracing extends Command
         parent::__construct();
 
         $this->config = $config;
-        $this->schemaSourceProvider = $schemaSourceProvider;
         $this->redisConnector = $redisConnector;
     }
 
@@ -82,7 +79,7 @@ class SubmitTracing extends Command
             $this->output->writeln('Sending ' . count($tracings) . ' tracing(s) to Apollo Studio');
 
             try {
-                (new SendTracingToApollo($this->config, $this->schemaSourceProvider, $tracings))
+                (new SendTracingToApollo($this->config, $tracings))
                     ->send();
             } catch (Exception $e) {
                 $this->error('An error occurred submitting tracings:');

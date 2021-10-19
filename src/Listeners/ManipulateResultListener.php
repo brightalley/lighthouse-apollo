@@ -17,10 +17,8 @@ use Illuminate\Support\Arr;
 use JsonException;
 use LogicException;
 use Mdg\Trace\HTTP\Method;
-use Mdg\Trace\HTTP\Values;
 use Nuwave\Lighthouse\Events\ManipulateResult;
 use Nuwave\Lighthouse\Execution\GraphQLRequest;
-use Nuwave\Lighthouse\Schema\Source\SchemaSourceProvider;
 
 class ManipulateResultListener
 {
@@ -36,8 +34,6 @@ class ManipulateResultListener
 
     private Request $request;
 
-    private SchemaSourceProvider $schemaSourceProvider;
-
     /**
      * Constructor.
      *
@@ -46,22 +42,19 @@ class ManipulateResultListener
      * @param GraphQLRequest $graphQlRequest
      * @param RedisConnector $redisConnector
      * @param Request $request
-     * @param SchemaSourceProvider $schemaSourceProvider
      */
     public function __construct(
         ClientInformationExtractor $clientInformationExtractor,
         Config $config,
         GraphQLRequest $graphQlRequest,
         RedisConnector $redisConnector,
-        Request $request,
-        SchemaSourceProvider $schemaSourceProvider
+        Request $request
     ) {
         $this->clientInformationExtractor = $clientInformationExtractor;
         $this->config = $config;
         $this->graphQlRequest = $graphQlRequest;
         $this->redisConnector = $redisConnector;
         $this->request = $request;
-        $this->schemaSourceProvider = $schemaSourceProvider;
     }
 
     /**
@@ -103,7 +96,7 @@ class ManipulateResultListener
         switch ($tracingSendMode) {
             case 'sync':
                 try {
-                    (new SendTracingToApollo($this->config, $this->schemaSourceProvider, [$trace]))
+                    (new SendTracingToApollo($this->config, [$trace]))
                         ->send();
                 } catch (Exception $e) {
                     // We should probably not cause pain for the end users. Just include this in the extensions instead.
