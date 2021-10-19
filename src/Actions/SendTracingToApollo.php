@@ -96,7 +96,7 @@ class SendTracingToApollo
                 'runtime_version' => 'PHP ' . PHP_VERSION,
                 'graph_ref' =>
                     $this->config->get('lighthouse-apollo.apollo_graph_id') . '@' .
-                    $this->config->get('lighthouse-apollo.apollo_graph_ref'),
+                    $this->config->get('lighthouse-apollo.apollo_graph_variant'),
                 'uname' => php_uname(),
             ]),
             'traces_per_query' => $tracesPerQuery,
