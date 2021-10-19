@@ -56,5 +56,8 @@
                 "BrightAlley\\LighthouseApollo\\ServiceProvider"
             ]
         }
+    },
+    "scripts": {
+        "update-proto": "curl -sSfo resources/reports.proto https://usage-reporting.api.apollographql.com/proto/reports.proto"
     }
 }

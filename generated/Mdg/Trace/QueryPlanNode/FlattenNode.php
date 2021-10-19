@@ -64,11 +64,11 @@ class FlattenNode extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.mdg.engine.proto.Trace.QueryPlanNode node = 2;</code>
-     * @return \Mdg\Trace\QueryPlanNode
+     * @return \Mdg\Trace\QueryPlanNode|null
      */
     public function getNode()
     {
-        return isset($this->node) ? $this->node : null;
+        return $this->node;
     }
 
     public function hasNode()

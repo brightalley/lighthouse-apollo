@@ -23,13 +23,6 @@ class Details extends \Google\Protobuf\Internal\Message
      */
     private $variables_json;
     /**
-     * Deprecated. Engineproxy did not encode variable values as JSON, so you
-     * couldn't tell numbers from numeric strings. Send variables_json instead.
-     *
-     * Generated from protobuf field <code>map<string, bytes> deprecated_variables = 1;</code>
-     */
-    private $deprecated_variables;
-    /**
      * This is deprecated and only used for legacy applications
      * don't include this in traces inside a FullTracesReport; the operation
      * name for these traces comes from the key of the traces_per_query map.
@@ -49,9 +42,6 @@ class Details extends \Google\Protobuf\Internal\Message
      *           configured to keep them all private). Values are JSON: ie, strings are
      *           enclosed in double quotes, etc.  The value of a private variable is
      *           the empty string.
-     *     @type array|\Google\Protobuf\Internal\MapField $deprecated_variables
-     *           Deprecated. Engineproxy did not encode variable values as JSON, so you
-     *           couldn't tell numbers from numeric strings. Send variables_json instead.
      *     @type string $operation_name
      *           This is deprecated and only used for legacy applications
      *           don't include this in traces inside a FullTracesReport; the operation
@@ -91,34 +81,6 @@ class Details extends \Google\Protobuf\Internal\Message
     {
         $arr = GPBUtil::checkMapField($var, \Google\Protobuf\Internal\GPBType::STRING, \Google\Protobuf\Internal\GPBType::STRING);
         $this->variables_json = $arr;
-
-        return $this;
-    }
-
-    /**
-     * Deprecated. Engineproxy did not encode variable values as JSON, so you
-     * couldn't tell numbers from numeric strings. Send variables_json instead.
-     *
-     * Generated from protobuf field <code>map<string, bytes> deprecated_variables = 1;</code>
-     * @return \Google\Protobuf\Internal\MapField
-     */
-    public function getDeprecatedVariables()
-    {
-        return $this->deprecated_variables;
-    }
-
-    /**
-     * Deprecated. Engineproxy did not encode variable values as JSON, so you
-     * couldn't tell numbers from numeric strings. Send variables_json instead.
-     *
-     * Generated from protobuf field <code>map<string, bytes> deprecated_variables = 1;</code>
-     * @param array|\Google\Protobuf\Internal\MapField $var
-     * @return $this
-     */
-    public function setDeprecatedVariables($var)
-    {
-        $arr = GPBUtil::checkMapField($var, \Google\Protobuf\Internal\GPBType::STRING, \Google\Protobuf\Internal\GPBType::BYTES);
-        $this->deprecated_variables = $arr;
 
         return $this;
     }

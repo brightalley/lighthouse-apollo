@@ -39,11 +39,11 @@ class ContextualizedTypeStats extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.mdg.engine.proto.StatsContext context = 1;</code>
-     * @return \Mdg\StatsContext
+     * @return \Mdg\StatsContext|null
      */
     public function getContext()
     {
-        return isset($this->context) ? $this->context : null;
+        return $this->context;
     }
 
     public function hasContext()

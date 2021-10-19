@@ -55,6 +55,18 @@ class Trace extends \Google\Protobuf\Internal\Message
      */
     protected $signature = '';
     /**
+     * Optional: when GraphQL parsing or validation against the GraphQL schema fails, these fields
+     * can include reference to the operation being sent for users to dig into the set of operations
+     * that are failing validation.
+     *
+     * Generated from protobuf field <code>string unexecutedOperationBody = 27;</code>
+     */
+    protected $unexecutedOperationBody = '';
+    /**
+     * Generated from protobuf field <code>string unexecutedOperationName = 28;</code>
+     */
+    protected $unexecutedOperationName = '';
+    /**
      * Generated from protobuf field <code>.mdg.engine.proto.Trace.Details details = 6;</code>
      */
     protected $details = null;
@@ -127,17 +139,6 @@ class Trace extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>bool forbidden_operation = 25;</code>
      */
     protected $forbidden_operation = false;
-    /**
-     * Older agents (eg the Go engineproxy) relied to some degree on the Engine
-     * backend to run their own semi-compatible implementation of a specific
-     * variant of query signatures. The backend does not do this for new agents (which
-     * set the above 'signature' field). It used to still "re-sign" signatures
-     * from engineproxy, but we've now simplified the backend to no longer do this.
-     * Deprecated and ignored in FullTracesReports.
-     *
-     * Generated from protobuf field <code>string legacy_signature_needs_resigning = 5;</code>
-     */
-    protected $legacy_signature_needs_resigning = '';
 
     /**
      * Constructor.
@@ -166,6 +167,11 @@ class Trace extends \Google\Protobuf\Internal\Message
      *           that signature is in the key of traces_per_query rather than in this field.
      *           Engineproxy provides the signature in legacy_signature_needs_resigning
      *           instead.
+     *     @type string $unexecutedOperationBody
+     *           Optional: when GraphQL parsing or validation against the GraphQL schema fails, these fields
+     *           can include reference to the operation being sent for users to dig into the set of operations
+     *           that are failing validation.
+     *     @type string $unexecutedOperationName
      *     @type \Mdg\Trace\Details $details
      *     @type string $client_name
      *           Note: engineproxy always sets client_name, client_version, and client_address to "none".
@@ -193,13 +199,6 @@ class Trace extends \Google\Protobuf\Internal\Message
      *           Was this operation registered and a part of the safelist?
      *     @type bool $forbidden_operation
      *           Was this operation forbidden due to lack of safelisting?
-     *     @type string $legacy_signature_needs_resigning
-     *           Older agents (eg the Go engineproxy) relied to some degree on the Engine
-     *           backend to run their own semi-compatible implementation of a specific
-     *           variant of query signatures. The backend does not do this for new agents (which
-     *           set the above 'signature' field). It used to still "re-sign" signatures
-     *           from engineproxy, but we've now simplified the backend to no longer do this.
-     *           Deprecated and ignored in FullTracesReports.
      * }
      */
     public function __construct($data = NULL) {
@@ -211,11 +210,11 @@ class Trace extends \Google\Protobuf\Internal\Message
      * Wallclock time when the trace began.
      *
      * Generated from protobuf field <code>.google.protobuf.Timestamp start_time = 4;</code>
-     * @return \Google\Protobuf\Timestamp
+     * @return \Google\Protobuf\Timestamp|null
      */
     public function getStartTime()
     {
-        return isset($this->start_time) ? $this->start_time : null;
+        return $this->start_time;
     }
 
     public function hasStartTime()
@@ -247,11 +246,11 @@ class Trace extends \Google\Protobuf\Internal\Message
      * Wallclock time when the trace ended.
      *
      * Generated from protobuf field <code>.google.protobuf.Timestamp end_time = 3;</code>
-     * @return \Google\Protobuf\Timestamp
+     * @return \Google\Protobuf\Timestamp|null
      */
     public function getEndTime()
     {
-        return isset($this->end_time) ? $this->end_time : null;
+        return $this->end_time;
     }
 
     public function hasEndTime()
@@ -312,11 +311,11 @@ class Trace extends \Google\Protobuf\Internal\Message
      * service, including errors.
      *
      * Generated from protobuf field <code>.mdg.engine.proto.Trace.Node root = 14;</code>
-     * @return \Mdg\Trace\Node
+     * @return \Mdg\Trace\Node|null
      */
     public function getRoot()
     {
-        return isset($this->root) ? $this->root : null;
+        return $this->root;
     }
 
     public function hasRoot()
@@ -390,12 +389,64 @@ class Trace extends \Google\Protobuf\Internal\Message
     }
 
     /**
+     * Optional: when GraphQL parsing or validation against the GraphQL schema fails, these fields
+     * can include reference to the operation being sent for users to dig into the set of operations
+     * that are failing validation.
+     *
+     * Generated from protobuf field <code>string unexecutedOperationBody = 27;</code>
+     * @return string
+     */
+    public function getUnexecutedOperationBody()
+    {
+        return $this->unexecutedOperationBody;
+    }
+
+    /**
+     * Optional: when GraphQL parsing or validation against the GraphQL schema fails, these fields
+     * can include reference to the operation being sent for users to dig into the set of operations
+     * that are failing validation.
+     *
+     * Generated from protobuf field <code>string unexecutedOperationBody = 27;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setUnexecutedOperationBody($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->unexecutedOperationBody = $var;
+
+        return $this;
+    }
+
+    /**
+     * Generated from protobuf field <code>string unexecutedOperationName = 28;</code>
+     * @return string
+     */
+    public function getUnexecutedOperationName()
+    {
+        return $this->unexecutedOperationName;
+    }
+
+    /**
+     * Generated from protobuf field <code>string unexecutedOperationName = 28;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setUnexecutedOperationName($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->unexecutedOperationName = $var;
+
+        return $this;
+    }
+
+    /**
      * Generated from protobuf field <code>.mdg.engine.proto.Trace.Details details = 6;</code>
-     * @return \Mdg\Trace\Details
+     * @return \Mdg\Trace\Details|null
      */
     public function getDetails()
     {
-        return isset($this->details) ? $this->details : null;
+        return $this->details;
     }
 
     public function hasDetails()
@@ -517,11 +568,11 @@ class Trace extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.mdg.engine.proto.Trace.HTTP http = 10;</code>
-     * @return \Mdg\Trace\HTTP
+     * @return \Mdg\Trace\HTTP|null
      */
     public function getHttp()
     {
-        return isset($this->http) ? $this->http : null;
+        return $this->http;
     }
 
     public function hasHttp()
@@ -549,11 +600,11 @@ class Trace extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.mdg.engine.proto.Trace.CachePolicy cache_policy = 18;</code>
-     * @return \Mdg\Trace\CachePolicy
+     * @return \Mdg\Trace\CachePolicy|null
      */
     public function getCachePolicy()
     {
-        return isset($this->cache_policy) ? $this->cache_policy : null;
+        return $this->cache_policy;
     }
 
     public function hasCachePolicy()
@@ -586,11 +637,11 @@ class Trace extends \Google\Protobuf\Internal\Message
      * that occurred in the gateway itself).
      *
      * Generated from protobuf field <code>.mdg.engine.proto.Trace.QueryPlanNode query_plan = 26;</code>
-     * @return \Mdg\Trace\QueryPlanNode
+     * @return \Mdg\Trace\QueryPlanNode|null
      */
     public function getQueryPlan()
     {
-        return isset($this->query_plan) ? $this->query_plan : null;
+        return $this->query_plan;
     }
 
     public function hasQueryPlan()
@@ -753,42 +804,6 @@ class Trace extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkBool($var);
         $this->forbidden_operation = $var;
-
-        return $this;
-    }
-
-    /**
-     * Older agents (eg the Go engineproxy) relied to some degree on the Engine
-     * backend to run their own semi-compatible implementation of a specific
-     * variant of query signatures. The backend does not do this for new agents (which
-     * set the above 'signature' field). It used to still "re-sign" signatures
-     * from engineproxy, but we've now simplified the backend to no longer do this.
-     * Deprecated and ignored in FullTracesReports.
-     *
-     * Generated from protobuf field <code>string legacy_signature_needs_resigning = 5;</code>
-     * @return string
-     */
-    public function getLegacySignatureNeedsResigning()
-    {
-        return $this->legacy_signature_needs_resigning;
-    }
-
-    /**
-     * Older agents (eg the Go engineproxy) relied to some degree on the Engine
-     * backend to run their own semi-compatible implementation of a specific
-     * variant of query signatures. The backend does not do this for new agents (which
-     * set the above 'signature' field). It used to still "re-sign" signatures
-     * from engineproxy, but we've now simplified the backend to no longer do this.
-     * Deprecated and ignored in FullTracesReports.
-     *
-     * Generated from protobuf field <code>string legacy_signature_needs_resigning = 5;</code>
-     * @param string $var
-     * @return $this
-     */
-    public function setLegacySignatureNeedsResigning($var)
-    {
-        GPBUtil::checkString($var, True);
-        $this->legacy_signature_needs_resigning = $var;
 
         return $this;
     }
