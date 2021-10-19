@@ -21,7 +21,6 @@ use LogicException;
 use Mdg\Trace\HTTP\Method;
 use Nuwave\Lighthouse\Events\ManipulateResult;
 use Nuwave\Lighthouse\Events\StartExecution;
-use Nuwave\Lighthouse\Schema\Source\SchemaSourceProvider;
 
 class ManipulateResultListener
 {
@@ -35,8 +34,6 @@ class ManipulateResultListener
 
     private Request $request;
 
-    private SchemaSourceProvider $schemaSourceProvider;
-
     private QueryRequestStack $requestStack;
 
     /**
@@ -47,22 +44,19 @@ class ManipulateResultListener
      * @param QueryRequestStack $requestStack
      * @param RedisConnector $redisConnector
      * @param Request $request
-     * @param SchemaSourceProvider $schemaSourceProvider
      */
     public function __construct(
         ClientInformationExtractor $clientInformationExtractor,
         Config $config,
         QueryRequestStack $requestStack,
         RedisConnector $redisConnector,
-        Request $request,
-        SchemaSourceProvider $schemaSourceProvider
+        Request $request
     ) {
         $this->clientInformationExtractor = $clientInformationExtractor;
         $this->config = $config;
         $this->requestStack = $requestStack;
         $this->redisConnector = $redisConnector;
         $this->request = $request;
-        $this->schemaSourceProvider = $schemaSourceProvider;
     }
 
     /**
@@ -111,7 +105,7 @@ class ManipulateResultListener
         switch ($tracingSendMode) {
             case 'sync':
                 try {
-                    (new SendTracingToApollo($this->config, $this->schemaSourceProvider, [$trace]))
+                    (new SendTracingToApollo($this->config, [$trace]))
                         ->send();
                 } catch (Exception $e) {
                     // We should probably not cause pain for the end users. Just include this in the extensions instead.

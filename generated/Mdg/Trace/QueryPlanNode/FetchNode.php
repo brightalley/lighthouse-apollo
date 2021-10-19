@@ -139,11 +139,11 @@ class FetchNode extends \Google\Protobuf\Internal\Message
      * will be handled by the ingress server.
      *
      * Generated from protobuf field <code>.mdg.engine.proto.Trace trace = 3;</code>
-     * @return \Mdg\Trace
+     * @return \Mdg\Trace|null
      */
     public function getTrace()
     {
-        return isset($this->trace) ? $this->trace : null;
+        return $this->trace;
     }
 
     public function hasTrace()
@@ -204,11 +204,11 @@ class FetchNode extends \Google\Protobuf\Internal\Message
      * sent and received.
      *
      * Generated from protobuf field <code>.google.protobuf.Timestamp sent_time = 5;</code>
-     * @return \Google\Protobuf\Timestamp
+     * @return \Google\Protobuf\Timestamp|null
      */
     public function getSentTime()
     {
-        return isset($this->sent_time) ? $this->sent_time : null;
+        return $this->sent_time;
     }
 
     public function hasSentTime()
@@ -239,11 +239,11 @@ class FetchNode extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.google.protobuf.Timestamp received_time = 6;</code>
-     * @return \Google\Protobuf\Timestamp
+     * @return \Google\Protobuf\Timestamp|null
      */
     public function getReceivedTime()
     {
-        return isset($this->received_time) ? $this->received_time : null;
+        return $this->received_time;
     }
 
     public function hasReceivedTime()

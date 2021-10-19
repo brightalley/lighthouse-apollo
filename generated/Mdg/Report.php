@@ -77,11 +77,11 @@ class Report extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.mdg.engine.proto.ReportHeader header = 1;</code>
-     * @return \Mdg\ReportHeader
+     * @return \Mdg\ReportHeader|null
      */
     public function getHeader()
     {
-        return isset($this->header) ? $this->header : null;
+        return $this->header;
     }
 
     public function hasHeader()
@@ -152,11 +152,11 @@ class Report extends \Google\Protobuf\Internal\Message
      * Note: This will override the end_time from traces.
      *
      * Generated from protobuf field <code>.google.protobuf.Timestamp end_time = 2;</code>
-     * @return \Google\Protobuf\Timestamp
+     * @return \Google\Protobuf\Timestamp|null
      */
     public function getEndTime()
     {
-        return isset($this->end_time) ? $this->end_time : null;
+        return $this->end_time;
     }
 
     public function hasEndTime()

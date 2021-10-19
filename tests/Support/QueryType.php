@@ -22,7 +22,7 @@ class QueryType extends ObjectType
         parent::__construct($config);
     }
 
-    public function hello()
+    public function hello(): string
     {
         return 'world';
     }

@@ -218,11 +218,11 @@ class Node extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.mdg.engine.proto.Trace.CachePolicy cache_policy = 5;</code>
-     * @return \Mdg\Trace\CachePolicy
+     * @return \Mdg\Trace\CachePolicy|null
      */
     public function getCachePolicy()
     {
-        return isset($this->cache_policy) ? $this->cache_policy : null;
+        return $this->cache_policy;
     }
 
     public function hasCachePolicy()

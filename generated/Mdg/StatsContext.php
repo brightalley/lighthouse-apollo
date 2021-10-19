@@ -14,10 +14,6 @@ use Google\Protobuf\Internal\GPBUtil;
 class StatsContext extends \Google\Protobuf\Internal\Message
 {
     /**
-     * Generated from protobuf field <code>string client_reference_id = 1;</code>
-     */
-    protected $client_reference_id = '';
-    /**
      * Generated from protobuf field <code>string client_name = 2;</code>
      */
     protected $client_name = '';
@@ -32,7 +28,6 @@ class StatsContext extends \Google\Protobuf\Internal\Message
      * @param array $data {
      *     Optional. Data for populating the Message object.
      *
-     *     @type string $client_reference_id
      *     @type string $client_name
      *     @type string $client_version
      * }
@@ -40,28 +35,6 @@ class StatsContext extends \Google\Protobuf\Internal\Message
     public function __construct($data = NULL) {
         \Metadata\Reports::initOnce();
         parent::__construct($data);
-    }
-
-    /**
-     * Generated from protobuf field <code>string client_reference_id = 1;</code>
-     * @return string
-     */
-    public function getClientReferenceId()
-    {
-        return $this->client_reference_id;
-    }
-
-    /**
-     * Generated from protobuf field <code>string client_reference_id = 1;</code>
-     * @param string $var
-     * @return $this
-     */
-    public function setClientReferenceId($var)
-    {
-        GPBUtil::checkString($var, True);
-        $this->client_reference_id = $var;
-
-        return $this;
     }
 
     /**

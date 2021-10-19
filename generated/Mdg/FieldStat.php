@@ -34,7 +34,7 @@ class FieldStat extends \Google\Protobuf\Internal\Message
     /**
      * Duration histogram; see docs/histograms.md
      *
-     * Generated from protobuf field <code>repeated int64 latency_count = 8;</code>
+     * Generated from protobuf field <code>repeated sint64 latency_count = 9;</code>
      */
     private $latency_count;
 
@@ -153,7 +153,7 @@ class FieldStat extends \Google\Protobuf\Internal\Message
     /**
      * Duration histogram; see docs/histograms.md
      *
-     * Generated from protobuf field <code>repeated int64 latency_count = 8;</code>
+     * Generated from protobuf field <code>repeated sint64 latency_count = 9;</code>
      * @return \Google\Protobuf\Internal\RepeatedField
      */
     public function getLatencyCount()
@@ -164,13 +164,13 @@ class FieldStat extends \Google\Protobuf\Internal\Message
     /**
      * Duration histogram; see docs/histograms.md
      *
-     * Generated from protobuf field <code>repeated int64 latency_count = 8;</code>
+     * Generated from protobuf field <code>repeated sint64 latency_count = 9;</code>
      * @param int[]|string[]|\Google\Protobuf\Internal\RepeatedField $var
      * @return $this
      */
     public function setLatencyCount($var)
     {
-        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::INT64);
+        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::SINT64);
         $this->latency_count = $arr;
 
         return $this;

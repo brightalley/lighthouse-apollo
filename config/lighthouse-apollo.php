@@ -61,7 +61,7 @@ return [
     /**
      * Which request headers to not include in the HTTP information for a tracing. Should be lowercase.
      */
-    'excluded_request_headers' => ['authentication', 'cookie', 'set-cookie'],
+    'excluded_request_headers' => ['authentication', 'authorization', 'cookie', 'set-cookie'],
 
     /**
      * Whether to send query/mutation variables to Apollo Studio.

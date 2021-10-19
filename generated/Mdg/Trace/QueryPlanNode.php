@@ -39,7 +39,7 @@ class QueryPlanNode extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.mdg.engine.proto.Trace.QueryPlanNode.SequenceNode sequence = 1;</code>
-     * @return \Mdg\Trace\QueryPlanNode\SequenceNode
+     * @return \Mdg\Trace\QueryPlanNode\SequenceNode|null
      */
     public function getSequence()
     {
@@ -66,7 +66,7 @@ class QueryPlanNode extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.mdg.engine.proto.Trace.QueryPlanNode.ParallelNode parallel = 2;</code>
-     * @return \Mdg\Trace\QueryPlanNode\ParallelNode
+     * @return \Mdg\Trace\QueryPlanNode\ParallelNode|null
      */
     public function getParallel()
     {
@@ -93,7 +93,7 @@ class QueryPlanNode extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.mdg.engine.proto.Trace.QueryPlanNode.FetchNode fetch = 3;</code>
-     * @return \Mdg\Trace\QueryPlanNode\FetchNode
+     * @return \Mdg\Trace\QueryPlanNode\FetchNode|null
      */
     public function getFetch()
     {
@@ -120,7 +120,7 @@ class QueryPlanNode extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.mdg.engine.proto.Trace.QueryPlanNode.FlattenNode flatten = 4;</code>
-     * @return \Mdg\Trace\QueryPlanNode\FlattenNode
+     * @return \Mdg\Trace\QueryPlanNode\FlattenNode|null
      */
     public function getFlatten()
     {

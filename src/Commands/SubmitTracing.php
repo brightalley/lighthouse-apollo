@@ -26,8 +26,6 @@ class SubmitTracing extends Command
 
     private Config $config;
 
-    private SchemaSourceProvider $schemaSourceProvider;
-
     private RedisConnector $redisConnector;
 
     /**
@@ -45,7 +43,6 @@ class SubmitTracing extends Command
         parent::__construct();
 
         $this->config = $config;
-        $this->schemaSourceProvider = $schemaSourceProvider;
         $this->redisConnector = $redisConnector;
     }
 
@@ -72,24 +69,28 @@ class SubmitTracing extends Command
 
     private function handleFromRedis(): void
     {
-        $tracings = $this->redisConnector->getPending();
-        if (count($tracings) === 0) {
-            $this->output->warning('No pending tracings on Redis.');
+        while (true) {
+            $tracings = $this->redisConnector->getPending();
+            if (count($tracings) === 0) {
+                $this->output->warning('No pending tracings on Redis.');
 
-            return;
-        }
+                break;
+            }
 
-        $this->output->writeln('Sending ' . count($tracings) . ' tracing(s) to Apollo Studio');
+            $this->output->writeln('Sending ' . count($tracings) . ' tracing(s) to Apollo Studio');
 
-        try {
-            (new SendTracingToApollo($this->config, $this->schemaSourceProvider, $tracings))
-                ->send();
-        } catch (Exception $e) {
-            $this->error('An error occurred submitting tracings:');
-            $this->error($e->getMessage());
+            try {
+                (new SendTracingToApollo($this->config, $tracings))
+                    ->send();
+            } catch (Exception $e) {
+                $this->error('An error occurred submitting tracings:');
+                $this->error($e->getMessage());
 
-            // Put the tracings back on the queue.
-            $this->redisConnector->putMany($tracings);
+                // Put the tracings back on the queue.
+                $this->redisConnector->putMany($tracings);
+
+                break;
+            }
         }
     }
 }

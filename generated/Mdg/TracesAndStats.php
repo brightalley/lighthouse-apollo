@@ -23,6 +23,14 @@ class TracesAndStats extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>repeated .mdg.engine.proto.ContextualizedStats stats_with_context = 2;</code>
      */
     private $stats_with_context;
+    /**
+     * This field is used to validate that the algorithm used to construct `stats_with_context`
+     * matches similar algorithms in Apollo's servers. It is otherwise ignored and should not
+     * be included in reports.
+     *
+     * Generated from protobuf field <code>repeated .mdg.engine.proto.Trace internal_traces_contributing_to_stats = 3;</code>
+     */
+    private $internal_traces_contributing_to_stats;
 
     /**
      * Constructor.
@@ -32,6 +40,10 @@ class TracesAndStats extends \Google\Protobuf\Internal\Message
      *
      *     @type \Mdg\Trace[]|\Google\Protobuf\Internal\RepeatedField $trace
      *     @type \Mdg\ContextualizedStats[]|\Google\Protobuf\Internal\RepeatedField $stats_with_context
+     *     @type \Mdg\Trace[]|\Google\Protobuf\Internal\RepeatedField $internal_traces_contributing_to_stats
+     *           This field is used to validate that the algorithm used to construct `stats_with_context`
+     *           matches similar algorithms in Apollo's servers. It is otherwise ignored and should not
+     *           be included in reports.
      * }
      */
     public function __construct($data = NULL) {
@@ -79,6 +91,36 @@ class TracesAndStats extends \Google\Protobuf\Internal\Message
     {
         $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::MESSAGE, \Mdg\ContextualizedStats::class);
         $this->stats_with_context = $arr;
+
+        return $this;
+    }
+
+    /**
+     * This field is used to validate that the algorithm used to construct `stats_with_context`
+     * matches similar algorithms in Apollo's servers. It is otherwise ignored and should not
+     * be included in reports.
+     *
+     * Generated from protobuf field <code>repeated .mdg.engine.proto.Trace internal_traces_contributing_to_stats = 3;</code>
+     * @return \Google\Protobuf\Internal\RepeatedField
+     */
+    public function getInternalTracesContributingToStats()
+    {
+        return $this->internal_traces_contributing_to_stats;
+    }
+
+    /**
+     * This field is used to validate that the algorithm used to construct `stats_with_context`
+     * matches similar algorithms in Apollo's servers. It is otherwise ignored and should not
+     * be included in reports.
+     *
+     * Generated from protobuf field <code>repeated .mdg.engine.proto.Trace internal_traces_contributing_to_stats = 3;</code>
+     * @param \Mdg\Trace[]|\Google\Protobuf\Internal\RepeatedField $var
+     * @return $this
+     */
+    public function setInternalTracesContributingToStats($var)
+    {
+        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::MESSAGE, \Mdg\Trace::class);
+        $this->internal_traces_contributing_to_stats = $arr;
 
         return $this;
     }

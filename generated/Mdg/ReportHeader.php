@@ -22,6 +22,12 @@ use Google\Protobuf\Internal\GPBUtil;
 class ReportHeader extends \Google\Protobuf\Internal\Message
 {
     /**
+     * eg "mygraph&#64;myvariant"
+     *
+     * Generated from protobuf field <code>string graph_ref = 12;</code>
+     */
+    protected $graph_ref = '';
+    /**
      * eg "host-01.example.com"
      *
      * Generated from protobuf field <code>string hostname = 5;</code>
@@ -52,12 +58,6 @@ class ReportHeader extends \Google\Protobuf\Internal\Message
      */
     protected $uname = '';
     /**
-     * eg "current", "prod"
-     *
-     * Generated from protobuf field <code>string schema_tag = 10;</code>
-     */
-    protected $schema_tag = '';
-    /**
      * An id that is used to represent the schema to Apollo Graph Manager
      * Using this in place of what used to be schema_hash, since that is no longer
      * attached to a schema in the backend.
@@ -72,6 +72,8 @@ class ReportHeader extends \Google\Protobuf\Internal\Message
      * @param array $data {
      *     Optional. Data for populating the Message object.
      *
+     *     @type string $graph_ref
+     *           eg "mygraph&#64;myvariant"
      *     @type string $hostname
      *           eg "host-01.example.com"
      *     @type string $agent_version
@@ -82,8 +84,6 @@ class ReportHeader extends \Google\Protobuf\Internal\Message
      *           eg "node v4.6.0"
      *     @type string $uname
      *           eg "Linux box 4.6.5-1-ec2 #1 SMP Mon Aug 1 02:31:38 PDT 2016 x86_64 GNU/Linux"
-     *     @type string $schema_tag
-     *           eg "current", "prod"
      *     @type string $executable_schema_id
      *           An id that is used to represent the schema to Apollo Graph Manager
      *           Using this in place of what used to be schema_hash, since that is no longer
@@ -93,6 +93,32 @@ class ReportHeader extends \Google\Protobuf\Internal\Message
     public function __construct($data = NULL) {
         \Metadata\Reports::initOnce();
         parent::__construct($data);
+    }
+
+    /**
+     * eg "mygraph&#64;myvariant"
+     *
+     * Generated from protobuf field <code>string graph_ref = 12;</code>
+     * @return string
+     */
+    public function getGraphRef()
+    {
+        return $this->graph_ref;
+    }
+
+    /**
+     * eg "mygraph&#64;myvariant"
+     *
+     * Generated from protobuf field <code>string graph_ref = 12;</code>
+     * @param string $var
+     * @return $this
+     */
+    public function setGraphRef($var)
+    {
+        GPBUtil::checkString($var, True);
+        $this->graph_ref = $var;
+
+        return $this;
     }
 
     /**
@@ -221,32 +247,6 @@ class ReportHeader extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->uname = $var;
-
-        return $this;
-    }
-
-    /**
-     * eg "current", "prod"
-     *
-     * Generated from protobuf field <code>string schema_tag = 10;</code>
-     * @return string
-     */
-    public function getSchemaTag()
-    {
-        return $this->schema_tag;
-    }
-
-    /**
-     * eg "current", "prod"
-     *
-     * Generated from protobuf field <code>string schema_tag = 10;</code>
-     * @param string $var
-     * @return $this
-     */
-    public function setSchemaTag($var)
-    {
-        GPBUtil::checkString($var, True);
-        $this->schema_tag = $var;
 
         return $this;
     }

@@ -5,16 +5,11 @@ namespace BrightAlley\LighthouseApollo\Actions;
 use BrightAlley\LighthouseApollo\Exceptions\SendTracingRequestFailedException;
 use BrightAlley\LighthouseApollo\Exceptions\SendTracingRequestInvalidResponseCode;
 use BrightAlley\LighthouseApollo\TracingResult;
-use DateTime;
 use Exception;
-use Google\Protobuf\Timestamp;
 use Illuminate\Contracts\Config\Repository as Config;
-use Illuminate\Support\Arr;
 use Mdg\Report;
 use Mdg\ReportHeader;
-use Mdg\Trace;
 use Mdg\TracesAndStats;
-use Nuwave\Lighthouse\Schema\Source\SchemaSourceProvider;
 
 class SendTracingToApollo
 {
@@ -25,19 +20,15 @@ class SendTracingToApollo
 
     private Config $config;
 
-    private SchemaSourceProvider $schemaSourceProvider;
-
     /**
      * Constructor.
      *
      * @param Config $config
-     * @param SchemaSourceProvider $schemaSourceProvider
      * @param array<int,TracingResult> $tracing
      */
-    public function __construct(Config $config, SchemaSourceProvider $schemaSourceProvider, array $tracing)
+    public function __construct(Config $config, array $tracing)
     {
         $this->config = $config;
-        $this->schemaSourceProvider = $schemaSourceProvider;
         $this->tracing = $tracing;
     }
 
@@ -65,16 +56,7 @@ class SendTracingToApollo
             return new TracesAndStats(['trace' => $tracesAndStats]);
         }, $tracesPerQuery);
 
-        $body = new Report([
-            'header' => new ReportHeader([
-                'agent_version' => '1.0',
-                'hostname' => $this->config->get('lighthouse-apollo.hostname'),
-                'runtime_version' => 'PHP ' . PHP_VERSION,
-                'schema_tag' => $this->config->get('lighthouse-apollo.apollo_graph_variant'),
-                'uname' => php_uname(),
-            ]),
-            'traces_per_query' => $tracesPerQuery,
-        ]);
+        $body = $this->getReportWithTraces($tracesPerQuery);
         $options = [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
@@ -102,6 +84,26 @@ class SendTracingToApollo
     }
 
     /**
+     * @param array<string,TracesAndStats> $tracesPerQuery
+     * @return Report
+     */
+    public function getReportWithTraces(array $tracesPerQuery): Report
+    {
+        return new Report([
+            'header' => new ReportHeader([
+                'agent_version' => '1.0',
+                'hostname' => $this->config->get('lighthouse-apollo.hostname'),
+                'runtime_version' => 'PHP ' . PHP_VERSION,
+                'graph_ref' =>
+                    $this->config->get('lighthouse-apollo.apollo_graph_id') . '@' .
+                    $this->config->get('lighthouse-apollo.apollo_graph_variant'),
+                'uname' => php_uname(),
+            ]),
+            'traces_per_query' => $tracesPerQuery,
+        ]);
+    }
+
+    /**
      * Try to "normalize" the GraphQL query, by stripping whitespace. This function could be made
      * more intelligent in the future. Also adds the required "# OperationName" on the first line
      * before the rest of the query.
@@ -110,7 +112,7 @@ class SendTracingToApollo
      * @param string|null $operationName
      * @return string
      */
-    private function normalizeQuery(string $query, ?string $operationName): string
+    public function normalizeQuery(string $query, ?string $operationName): string
     {
         $trimmed = trim(preg_replace('/[\r\n\s]+/', ' ', $query));
         if ($operationName !== null) {

@@ -14,7 +14,7 @@ use Google\Protobuf\Internal\GPBUtil;
 class QueryLatencyStats extends \Google\Protobuf\Internal\Message
 {
     /**
-     * Generated from protobuf field <code>repeated int64 latency_count = 1;</code>
+     * Generated from protobuf field <code>repeated sint64 latency_count = 13;</code>
      */
     private $latency_count;
     /**
@@ -34,7 +34,7 @@ class QueryLatencyStats extends \Google\Protobuf\Internal\Message
      */
     protected $persisted_query_misses = 0;
     /**
-     * Generated from protobuf field <code>repeated int64 cache_latency_count = 6;</code>
+     * Generated from protobuf field <code>repeated sint64 cache_latency_count = 14;</code>
      */
     private $cache_latency_count;
     /**
@@ -46,11 +46,11 @@ class QueryLatencyStats extends \Google\Protobuf\Internal\Message
      */
     protected $requests_with_errors_count = 0;
     /**
-     * Generated from protobuf field <code>repeated int64 public_cache_ttl_count = 9;</code>
+     * Generated from protobuf field <code>repeated sint64 public_cache_ttl_count = 15;</code>
      */
     private $public_cache_ttl_count;
     /**
-     * Generated from protobuf field <code>repeated int64 private_cache_ttl_count = 10;</code>
+     * Generated from protobuf field <code>repeated sint64 private_cache_ttl_count = 16;</code>
      */
     private $private_cache_ttl_count;
     /**
@@ -88,7 +88,7 @@ class QueryLatencyStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>repeated int64 latency_count = 1;</code>
+     * Generated from protobuf field <code>repeated sint64 latency_count = 13;</code>
      * @return \Google\Protobuf\Internal\RepeatedField
      */
     public function getLatencyCount()
@@ -97,13 +97,13 @@ class QueryLatencyStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>repeated int64 latency_count = 1;</code>
+     * Generated from protobuf field <code>repeated sint64 latency_count = 13;</code>
      * @param int[]|string[]|\Google\Protobuf\Internal\RepeatedField $var
      * @return $this
      */
     public function setLatencyCount($var)
     {
-        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::INT64);
+        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::SINT64);
         $this->latency_count = $arr;
 
         return $this;
@@ -198,7 +198,7 @@ class QueryLatencyStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>repeated int64 cache_latency_count = 6;</code>
+     * Generated from protobuf field <code>repeated sint64 cache_latency_count = 14;</code>
      * @return \Google\Protobuf\Internal\RepeatedField
      */
     public function getCacheLatencyCount()
@@ -207,13 +207,13 @@ class QueryLatencyStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>repeated int64 cache_latency_count = 6;</code>
+     * Generated from protobuf field <code>repeated sint64 cache_latency_count = 14;</code>
      * @param int[]|string[]|\Google\Protobuf\Internal\RepeatedField $var
      * @return $this
      */
     public function setCacheLatencyCount($var)
     {
-        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::INT64);
+        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::SINT64);
         $this->cache_latency_count = $arr;
 
         return $this;
@@ -221,11 +221,11 @@ class QueryLatencyStats extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>.mdg.engine.proto.PathErrorStats root_error_stats = 7;</code>
-     * @return \Mdg\PathErrorStats
+     * @return \Mdg\PathErrorStats|null
      */
     public function getRootErrorStats()
     {
-        return isset($this->root_error_stats) ? $this->root_error_stats : null;
+        return $this->root_error_stats;
     }
 
     public function hasRootErrorStats()
@@ -274,7 +274,7 @@ class QueryLatencyStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>repeated int64 public_cache_ttl_count = 9;</code>
+     * Generated from protobuf field <code>repeated sint64 public_cache_ttl_count = 15;</code>
      * @return \Google\Protobuf\Internal\RepeatedField
      */
     public function getPublicCacheTtlCount()
@@ -283,20 +283,20 @@ class QueryLatencyStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>repeated int64 public_cache_ttl_count = 9;</code>
+     * Generated from protobuf field <code>repeated sint64 public_cache_ttl_count = 15;</code>
      * @param int[]|string[]|\Google\Protobuf\Internal\RepeatedField $var
      * @return $this
      */
     public function setPublicCacheTtlCount($var)
     {
-        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::INT64);
+        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::SINT64);
         $this->public_cache_ttl_count = $arr;
 
         return $this;
     }
 
     /**
-     * Generated from protobuf field <code>repeated int64 private_cache_ttl_count = 10;</code>
+     * Generated from protobuf field <code>repeated sint64 private_cache_ttl_count = 16;</code>
      * @return \Google\Protobuf\Internal\RepeatedField
      */
     public function getPrivateCacheTtlCount()
@@ -305,13 +305,13 @@ class QueryLatencyStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>repeated int64 private_cache_ttl_count = 10;</code>
+     * Generated from protobuf field <code>repeated sint64 private_cache_ttl_count = 16;</code>
      * @param int[]|string[]|\Google\Protobuf\Internal\RepeatedField $var
      * @return $this
      */
     public function setPrivateCacheTtlCount($var)
     {
-        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::INT64);
+        $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::SINT64);
         $this->private_cache_ttl_count = $arr;
 
         return $this;

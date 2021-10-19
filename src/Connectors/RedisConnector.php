@@ -52,13 +52,14 @@ class RedisConnector
     /**
      * @return array<int,TracingResult>
      */
-    public function getPending(): array
+    public function getPending(int $limit = 100): array
     {
         // Check the number of results in the redis key, so we can take them all.
         $length = $this->redis->command('llen', [self::REDIS_KEY]);
+        $resultsToFetch = min($length, $limit);
         $result = [];
         while (
-            count($result) < $length &&
+            count($result) < $resultsToFetch &&
             $serializedTracingResult = $this->redis->command('lpop', [self::REDIS_KEY])
         ) {
             $result[] = unserialize($serializedTracingResult, [
