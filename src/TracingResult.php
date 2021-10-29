@@ -143,9 +143,8 @@ class TracingResult
                         if ($matchingIndex !== null) {
                             $target = $matchingIndex;
                         } else {
-                            $child = $target->getChild();
                             $indexNode = new Trace\Node(['index' => $pathSegment]);
-                            $target->setChild(array_merge($this->iteratorToArray($child), [$indexNode]));
+                            $target->getChild()[] = $indexNode;
 
                             $target = $indexNode;
                         }
@@ -160,8 +159,7 @@ class TracingResult
                     }
                 }
 
-                $child = $target->getChild();
-                $target->setChild(array_merge($this->iteratorToArray($child), [$node]));
+                $target->getChild()[] = $node;
             }
         }
 
@@ -181,8 +179,9 @@ class TracingResult
             ]));
             $rootNode->setError($rootErrors);
         } else {
-            $existingRootErrors = $rootNode->getError();
-            $rootNode->setError(array_merge($this->iteratorToArray($existingRootErrors), $rootErrors));
+            foreach ($rootErrors as $rootError) {
+                $rootNode->getError()[] = $rootError;
+            }
         }
 
         return $result;
