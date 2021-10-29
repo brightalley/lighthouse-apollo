@@ -86,10 +86,6 @@ class Trace extends \Google\Protobuf\Internal\Message
      */
     protected $client_address = '';
     /**
-     * Generated from protobuf field <code>string client_reference_id = 23;</code>
-     */
-    protected $client_reference_id = '';
-    /**
      * Generated from protobuf field <code>.mdg.engine.proto.Trace.HTTP http = 10;</code>
      */
     protected $http = null;
@@ -178,7 +174,6 @@ class Trace extends \Google\Protobuf\Internal\Message
      *           apollo-engine-reporting allows for them to be set by the user.
      *     @type string $client_version
      *     @type string $client_address
-     *     @type string $client_reference_id
      *     @type \Mdg\Trace\HTTP $http
      *     @type \Mdg\Trace\CachePolicy $cache_policy
      *     @type \Mdg\Trace\QueryPlanNode $query_plan
@@ -540,28 +535,6 @@ class Trace extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->client_address = $var;
-
-        return $this;
-    }
-
-    /**
-     * Generated from protobuf field <code>string client_reference_id = 23;</code>
-     * @return string
-     */
-    public function getClientReferenceId()
-    {
-        return $this->client_reference_id;
-    }
-
-    /**
-     * Generated from protobuf field <code>string client_reference_id = 23;</code>
-     * @param string $var
-     * @return $this
-     */
-    public function setClientReferenceId($var)
-    {
-        GPBUtil::checkString($var, True);
-        $this->client_reference_id = $var;
 
         return $this;
     }
