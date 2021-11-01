@@ -7,7 +7,6 @@ use BrightAlley\LighthouseApollo\Connectors\RedisConnector;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Config\Repository as Config;
-use Nuwave\Lighthouse\Schema\Source\SchemaSourceProvider;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor
@@ -33,13 +32,8 @@ class SubmitTracing extends Command
      *
      * @param Config $config
      * @param RedisConnector $redisConnector
-     * @param SchemaSourceProvider $schemaSourceProvider
      */
-    public function __construct(
-        Config $config,
-        RedisConnector $redisConnector,
-        SchemaSourceProvider $schemaSourceProvider
-    ) {
+    public function __construct(Config $config, RedisConnector $redisConnector) {
         parent::__construct();
 
         $this->config = $config;
