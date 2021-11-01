@@ -85,8 +85,11 @@ class SubmitTracing extends Command
                 $this->error('An error occurred submitting tracings:');
                 $this->error($e->getMessage());
 
-                // Put the tracings back on the queue.
-                $this->redisConnector->putMany($tracings);
+                // If the traces are not considered too old, put them back to retry later.
+                if (strpos($e->getMessage(), 'skewed timestamp') === false) {
+                    // Put the tracings back on the queue.
+                    $this->redisConnector->putMany($tracings);
+                }
 
                 break;
             }
