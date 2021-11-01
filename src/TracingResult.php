@@ -90,9 +90,6 @@ class TracingResult
         if (!empty($this->client['name'])) {
             $tracingData['client_name'] = $this->client['name'];
         }
-        if (!empty($this->client['reference_id'])) {
-            $tracingData['client_reference_id'] = $this->client['reference_id'];
-        }
         if (!empty($this->client['version'])) {
             $tracingData['client_version'] = $this->client['version'];
         }
