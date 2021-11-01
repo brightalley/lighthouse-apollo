@@ -100,6 +100,8 @@ class TracingResult
         }
 
         $result = new Trace($tracingData);
+        /** @var array<string,Trace\Node> $pathTargets */
+        $pathTargets = [];
 
         foreach ($this->tracing['execution']['resolvers'] as $trace) {
             $node = new Trace\Node([
@@ -122,42 +124,47 @@ class TracingResult
                 $node->setError($errors);
             }
 
+            $selfPathKey = implode('.', $trace['path']);
             if (count($trace['path']) === 1) {
                 $result->setRoot($node);
             } else {
-                /** @var Trace\Node $target */
-                $target = $result->getRoot();
-                foreach (array_slice($trace['path'], 1, -1) as $pathSegment) {
-                    if (is_numeric($pathSegment)) {
-                        $matchingIndex = null;
-                        foreach ($target->getChild() as $child) {
-                            if ($child->getIndex() === $pathSegment) {
-                                $matchingIndex = $child;
-                                break;
-                            }
-                        }
+                $directParent = $trace['path'][count($trace['path']) - 2];
+                $parentPathKey = implode(
+                    '.',
+                    is_numeric($directParent)
+                        ? array_slice($trace['path'], 0, -2)
+                        : array_slice($trace['path'], 0, -1)
+                );
+                $target = $pathTargets[$parentPathKey];
 
-                        if ($matchingIndex !== null) {
-                            $target = $matchingIndex;
-                        } else {
-                            $indexNode = new Trace\Node(['index' => $pathSegment]);
-                            $target->getChild()[] = $indexNode;
-
-                            $target = $indexNode;
+                // If the node is part of a list, find the correct index node. Note that there are
+                // no entries in the tracing from Lighthouse for the individual list elements, that's
+                // why they need to be resolved separately from the pathTargets lookup, as there would
+                // be no entry in the pathTargets lookup table for the direct parent of this node.
+                if (is_numeric($directParent)) {
+                    $matchingIndex = null;
+                    foreach ($target->getChild() as $child) {
+                        if ($child->getIndex() === $directParent) {
+                            $matchingIndex = $child;
+                            break;
                         }
+                    }
+
+                    if ($matchingIndex !== null) {
+                        $target = $matchingIndex;
                     } else {
-                        /** @var Trace\Node $child */
-                        foreach ($target->getChild() as $child) {
-                            if ($child->getResponseName() === $pathSegment) {
-                                $target = $child;
-                                break;
-                            }
-                        }
+                        $indexNode = new Trace\Node(['index' => $directParent]);
+                        $target->getChild()[] = $indexNode;
+
+                        $target = $indexNode;
                     }
                 }
 
                 $target->getChild()[] = $node;
             }
+
+            // Finally, store this node in the lookup for any descendents.
+            $pathTargets[$selfPathKey] = $node;
         }
 
         // Add all errors without a path to the root node.
