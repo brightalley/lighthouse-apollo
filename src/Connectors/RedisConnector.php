@@ -11,10 +11,9 @@ class RedisConnector
 {
     private const REDIS_KEY = 'lighthouse_apollo_tracings';
 
-    /**
-     * @var RedisConnection
-     */
-    private $redis;
+    private RedisConnection $redis;
+
+    private bool $redisSupportsLpopWithCount = false;
 
     /**
      * Constructor.
@@ -25,6 +24,13 @@ class RedisConnector
     public function __construct(Repository $config, RedisFactory $redis)
     {
         $this->redis = $redis->connection($config->get('lighthouse-apollo.redis_connection'));
+
+        $redisInfo = $this->redis->command('info', ['server']);
+        $this->redisSupportsLpopWithCount = version_compare(
+            $redisInfo['Server']['redis_version'] ?? '1.0.0',
+            '6.2.0',
+            '>='
+        ) === true;
     }
 
     /**
@@ -57,16 +63,31 @@ class RedisConnector
         // Check the number of results in the redis key, so we can take them all.
         $length = $this->redis->command('llen', [self::REDIS_KEY]);
         $resultsToFetch = min($length, $limit);
-        $result = [];
-        while (
-            count($result) < $resultsToFetch &&
-            $serializedTracingResult = $this->redis->command('lpop', [self::REDIS_KEY])
-        ) {
-            $result[] = unserialize($serializedTracingResult, [
-                'allowed_classes' => [TracingResult::class],
-            ]);
+
+        return $this->fetchTracingsFromRedis($resultsToFetch);
+    }
+
+    /**
+     * @return array<int,TracingResult>
+     */
+    protected function fetchTracingsFromRedis(int $count): array
+    {
+        if ($this->redisSupportsLpopWithCount) {
+             $result = $this->redis->command('lpop', [self::REDIS_KEY, $count]);
+        } else {
+            $result = [];
+            while (
+                count($result) < $count &&
+                $serializedTracingResult = $this->redis->command('lpop', [self::REDIS_KEY])
+            ) {
+                $result[] = $serializedTracingResult;
+            }
         }
 
-        return $result;
+        return array_map(
+            static fn(string $serializedTracingResult): TracingResult =>
+                unserialize($serializedTracingResult, ['allowed_classes' => [TracingResult::class]]),
+            $result
+        );
     }
 }
