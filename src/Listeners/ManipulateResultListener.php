@@ -120,12 +120,14 @@ class ManipulateResultListener
         }
     }
 
+    /**
+     * @return array{address: ?string, name: ?string, version: ?string}
+     */
     private function extractClientInformation(): array
     {
         return [
             'address' => $this->clientInformationExtractor->getClientAddress(),
             'name' => $this->clientInformationExtractor->getClientName(),
-            'reference_id' => $this->clientInformationExtractor->getClientReferenceId(),
             'version' => $this->clientInformationExtractor->getClientVersion(),
         ];
     }

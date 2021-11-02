@@ -19,7 +19,6 @@ trait UsesSampleData
             'address' => '',
             'name' => 'phpunit',
             'version' => '1.0',
-            'reference_id' => 'ref',
         ];
     }
 

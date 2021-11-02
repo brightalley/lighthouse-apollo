@@ -59,9 +59,8 @@ class TracingResultTest extends TestCase
         return [
             [['address' => null]],
             [['name' => null]],
-            [['reference_id' => null]],
             [['version' => null]],
-            [['address' => null, 'name' => null, 'reference_id' => null, 'version' => null]],
+            [['address' => null, 'name' => null, 'version' => null]],
         ];
     }
 
