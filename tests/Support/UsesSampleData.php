@@ -20,7 +20,6 @@ trait UsesSampleData
             'address' => '',
             'name' => 'phpunit',
             'version' => '1.0',
-            'reference_id' => 'ref',
         ];
     }
 
@@ -42,7 +41,9 @@ trait UsesSampleData
     {
         $tracing = new Tracing();
         $tracing->handleStartRequest($this->createMock(StartRequest::class));
-        $tracing->handleStartExecution($this->createMock(StartExecution::class));
+        $tracing->handleStartExecution(
+            $this->createMock(StartExecution::class),
+        );
         // Record one tracing.
         $now = microtime(true);
         $tracing->record(
@@ -52,23 +53,22 @@ trait UsesSampleData
                     'type' => new StringType(),
                 ]),
                 [],
-                $queryType = new QueryType(),
+                ($queryType = new QueryType()),
                 ['hello'],
                 new Schema(['query' => $queryType]),
                 [],
                 null,
                 null,
-                []
+                [],
             ),
             $now - 500,
-            $now
+            $now,
         );
 
         $extensionResponse = $tracing->handleBuildExtensionsResponse(
-            $this->createMock(BuildExtensionsResponse::class)
+            $this->createMock(BuildExtensionsResponse::class),
         );
 
         return $extensionResponse->content();
     }
-
 }

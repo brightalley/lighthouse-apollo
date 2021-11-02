@@ -15,8 +15,11 @@ class SendTracingRequestInvalidResponseCode extends Exception
     public function __construct(int $responseCode, $responseText)
     {
         parent::__construct(
-            'Unexpected response code ' . $responseCode . ' when sending tracing to Apollo Studio: ' . $responseText,
-            $responseCode
+            'Unexpected response code ' .
+                $responseCode .
+                ' when sending tracing to Apollo Studio: ' .
+                $responseText,
+            $responseCode,
         );
     }
 }

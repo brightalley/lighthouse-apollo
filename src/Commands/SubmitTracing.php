@@ -7,7 +7,6 @@ use BrightAlley\LighthouseApollo\Connectors\RedisConnector;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Config\Repository as Config;
-use Nuwave\Lighthouse\Schema\Source\SchemaSourceProvider;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor
@@ -33,13 +32,9 @@ class SubmitTracing extends Command
      *
      * @param Config $config
      * @param RedisConnector $redisConnector
-     * @param SchemaSourceProvider $schemaSourceProvider
      */
-    public function __construct(
-        Config $config,
-        RedisConnector $redisConnector,
-        SchemaSourceProvider $schemaSourceProvider
-    ) {
+    public function __construct(Config $config, RedisConnector $redisConnector)
+    {
         parent::__construct();
 
         $this->config = $config;
@@ -49,48 +44,59 @@ class SubmitTracing extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): void
+    public function handle(): int
     {
         /** @var string $sendTracingMode */
-        $sendTracingMode = $this->config->get('lighthouse-apollo.send_tracing_mode');
+        $sendTracingMode = $this->config->get(
+            'lighthouse-apollo.send_tracing_mode',
+        );
         switch ($sendTracingMode) {
             case 'sync':
-                $this->output->writeln('Send tracing mode is set to "sync", nothing to do.');
-                break;
+                $this->output->writeln(
+                    'Send tracing mode is set to "sync", nothing to do.',
+                );
+                return 0;
             case 'redis':
-                $this->handleFromRedis();
-                break;
+                return $this->handleFromRedis();
             default:
-                $this->output->error('Tracing mode "' . $sendTracingMode . '" is not supported.');
+                $this->output->error(
+                    'Tracing mode "' . $sendTracingMode . '" is not supported.',
+                );
+                return 1;
         }
-
-        $this->output->writeln('All done!');
     }
 
-    private function handleFromRedis(): void
+    private function handleFromRedis(): int
     {
         while (true) {
             $tracings = $this->redisConnector->getPending();
             if (count($tracings) === 0) {
                 $this->output->warning('No pending tracings on Redis.');
 
-                break;
+                return 0;
             }
 
-            $this->output->writeln('Sending ' . count($tracings) . ' tracing(s) to Apollo Studio');
+            $this->output->writeln(
+                'Sending ' . count($tracings) . ' tracing(s) to Apollo Studio',
+            );
 
             try {
-                (new SendTracingToApollo($this->config, $tracings))
-                    ->send();
+                (new SendTracingToApollo($this->config, $tracings))->send();
             } catch (Exception $e) {
                 $this->error('An error occurred submitting tracings:');
                 $this->error($e->getMessage());
 
-                // Put the tracings back on the queue.
-                $this->redisConnector->putMany($tracings);
+                // If the traces are not considered too old, put them back to retry later.
+                if (strpos($e->getMessage(), 'skewed timestamp') === false) {
+                    // Put the tracings back on the queue.
+                    $this->redisConnector->putMany($tracings);
+                }
 
-                break;
+                return 1;
             }
         }
+
+        $this->output->writeln('All done!');
+        return 0;
     }
 }

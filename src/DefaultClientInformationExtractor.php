@@ -23,7 +23,7 @@ class DefaultClientInformationExtractor implements ClientInformationExtractor
     {
         return $this->request->headers->get(
             'x-apollo-client-name',
-            $this->request->headers->get('apollographql-client-name')
+            $this->request->headers->get('apollographql-client-name'),
         );
     }
 
@@ -36,7 +36,7 @@ class DefaultClientInformationExtractor implements ClientInformationExtractor
     {
         return $this->request->headers->get(
             'x-apollo-client-version',
-            $this->request->headers->get('apollographql-client-version')
+            $this->request->headers->get('apollographql-client-version'),
         );
     }
 }

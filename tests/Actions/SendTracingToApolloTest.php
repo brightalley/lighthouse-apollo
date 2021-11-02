@@ -25,12 +25,18 @@ class SendTracingToApolloTest extends TestCase
             $this->sampleClientData(),
             $this->sampleHttpData(),
             $this->sampleTracingData(),
-            []
+            [],
         );
 
-        $action = (new SendTracingToApollo($this->createMock(Repository::class), [$tracing]));
+        $action = new SendTracingToApollo(
+            $this->createMock(Repository::class),
+            [$tracing],
+        );
         $traces = [
-            $action->normalizeQuery($tracing->queryText, $tracing->operationName) => new TracesAndStats([
+            $action->normalizeQuery(
+                $tracing->queryText,
+                $tracing->operationName,
+            ) => new TracesAndStats([
                 'trace' => [$tracing->getTracingAsProtobuf()],
             ]),
         ];

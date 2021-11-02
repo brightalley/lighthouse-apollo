@@ -24,7 +24,8 @@ use Nuwave\Lighthouse\Events\StartExecution;
 
 class ManipulateResultListener
 {
-    public const DEBUG_FLAGS = DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE;
+    public const DEBUG_FLAGS =
+        DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE;
 
     private ClientInformationExtractor $clientInformationExtractor;
 
@@ -95,18 +96,22 @@ class ManipulateResultListener
             $this->extractHttpInformation(),
             $event->result->extensions['tracing'] ?? [],
             array_map(function (Error $error) {
-                return FormattedError::createFromException($error, self::DEBUG_FLAGS);
+                return FormattedError::createFromException(
+                    $error,
+                    self::DEBUG_FLAGS,
+                );
             }, $event->result->errors),
         );
 
         $this->removeTracingFromExtensionsIfNeeded($event);
 
-        $tracingSendMode = $this->config->get('lighthouse-apollo.send_tracing_mode');
+        $tracingSendMode = $this->config->get(
+            'lighthouse-apollo.send_tracing_mode',
+        );
         switch ($tracingSendMode) {
             case 'sync':
                 try {
-                    (new SendTracingToApollo($this->config, [$trace]))
-                        ->send();
+                    (new SendTracingToApollo($this->config, [$trace]))->send();
                 } catch (Exception $e) {
                     // We should probably not cause pain for the end users. Just include this in the extensions instead.
                     $event->result->errors[] = new Error(
@@ -115,7 +120,7 @@ class ManipulateResultListener
                         null,
                         [],
                         null,
-                        $e
+                        $e,
                     );
                 }
                 break;
@@ -129,12 +134,14 @@ class ManipulateResultListener
         }
     }
 
+    /**
+     * @return array{address: ?string, name: ?string, version: ?string}
+     */
     private function extractClientInformation(): array
     {
         return [
             'address' => $this->clientInformationExtractor->getClientAddress(),
             'name' => $this->clientInformationExtractor->getClientName(),
-            'reference_id' => $this->clientInformationExtractor->getClientReferenceId(),
             'version' => $this->clientInformationExtractor->getClientVersion(),
         ];
     }
@@ -143,22 +150,30 @@ class ManipulateResultListener
     {
         // These keys should correspond with Protobuf's HTTP object.
         /** {@see \Mdg\Trace\HTTP} */
-        return array_merge([
-            'method' => Method::value($this->request->method()),
-            'host' => $this->request->getHost(),
-            'path' => $this->request->path(),
-            'secure' => $this->request->secure(),
-            'protocol' => $this->request->getProtocolVersion(),
-        ], $this->config->get('lighthouse-apollo.include_request_headers') ? [
-            'request_headers' => Arr::except(
-                $this->request->headers->all(),
-                $this->config->get('lighthouse-apollo.excluded_request_headers')
-            ),
-        ] : []);
+        return array_merge(
+            [
+                'method' => Method::value($this->request->method()),
+                'host' => $this->request->getHost(),
+                'path' => $this->request->path(),
+                'secure' => $this->request->secure(),
+                'protocol' => $this->request->getProtocolVersion(),
+            ],
+            $this->config->get('lighthouse-apollo.include_request_headers')
+                ? [
+                    'request_headers' => Arr::except(
+                        $this->request->headers->all(),
+                        $this->config->get(
+                            'lighthouse-apollo.excluded_request_headers',
+                        ),
+                    ),
+                ]
+                : [],
+        );
     }
 
-    private function removeTracingFromExtensionsIfNeeded(ManipulateResult $event): void
-    {
+    private function removeTracingFromExtensionsIfNeeded(
+        ManipulateResult $event
+    ): void {
         if ($this->config->get('lighthouse-apollo.mute_tracing_extensions')) {
             unset($event->result->extensions['tracing']);
         }
@@ -166,7 +181,10 @@ class ManipulateResultListener
 
     private function isIntrospectionQuery(string $query): bool
     {
-        return (bool) preg_match('/^\s*query[^{]*{\s*(\w+:\s*)?__schema\s*{/', $query);
+        return (bool) preg_match(
+            '/^\s*query[^{]*{\s*(\w+:\s*)?__schema\s*{/',
+            $query,
+        );
     }
 
     private function variables(StartExecution $execution): ?array
@@ -179,7 +197,9 @@ class ManipulateResultListener
         /** @var string[] $only */
         $only = $this->config->get('lighthouse-apollo.variables_only_names');
         /** @var string[] $except */
-        $except = $this->config->get('lighthouse-apollo.variables_except_names');
+        $except = $this->config->get(
+            'lighthouse-apollo.variables_except_names',
+        );
         foreach ($execution->variables ?? [] as $key => $value) {
             if (
                 (count($only) > 0 && !in_array($key, $only, true)) ||

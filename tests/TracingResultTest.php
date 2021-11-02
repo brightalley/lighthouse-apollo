@@ -31,7 +31,7 @@ class TracingResultTest extends TestCase
             $this->sampleClientData(),
             $this->sampleHttpData(),
             $this->sampleTracingData(),
-            []
+            [],
         );
         $proto = $tracing->getTracingAsProtobuf();
 
@@ -52,7 +52,7 @@ class TracingResultTest extends TestCase
             $this->sampleClientData(),
             $this->sampleHttpData(),
             $this->sampleTracingData(),
-            []
+            [],
         );
         $proto = $tracing->getTracingAsProtobuf();
 
@@ -65,9 +65,8 @@ class TracingResultTest extends TestCase
         return [
             [['address' => null]],
             [['name' => null]],
-            [['reference_id' => null]],
             [['version' => null]],
-            [['address' => null, 'name' => null, 'reference_id' => null, 'version' => null]],
+            [['address' => null, 'name' => null, 'version' => null]],
         ];
     }
 
@@ -75,8 +74,9 @@ class TracingResultTest extends TestCase
      * @covers \BrightAlley\LighthouseApollo\TracingResult::getTracingAsProtobuf
      * @dataProvider nullableClientFields
      */
-    public function testGetTracingAsProtobufNullableClientFields(array $clientData): void
-    {
+    public function testGetTracingAsProtobufNullableClientFields(
+        array $clientData
+    ): void {
         $tracing = new TracingResult(
             '{ hello }',
             null,
@@ -84,7 +84,7 @@ class TracingResultTest extends TestCase
             array_merge($this->sampleClientData(), $clientData),
             $this->sampleHttpData(),
             $this->sampleTracingData(),
-            []
+            [],
         );
         $proto = $tracing->getTracingAsProtobuf();
 
@@ -107,23 +107,32 @@ class TracingResultTest extends TestCase
             $this->sampleClientData(),
             $this->sampleHttpData(),
             $this->sampleTracingData(),
-            [FormattedError::createFromException(
-                new Error(
-                    'some error',
-                    null,
-                    null,
-                    [],
-                    null,
-                    new Exception('internal error message')
+            [
+                FormattedError::createFromException(
+                    new Error(
+                        'some error',
+                        null,
+                        null,
+                        [],
+                        null,
+                        new Exception('internal error message'),
+                    ),
+                    ManipulateResultListener::DEBUG_FLAGS,
                 ),
-                ManipulateResultListener::DEBUG_FLAGS
-            )]
+            ],
         );
         $proto = $tracing->getTracingAsProtobuf();
 
         self::assertNotNull($proto->getRoot());
         self::assertCount(1, $proto->getRoot()->getError());
-        self::assertEquals('some error', $proto->getRoot()->getError()->offsetGet(0)->getMessage());
+        self::assertEquals(
+            'some error',
+            $proto
+                ->getRoot()
+                ->getError()
+                ->offsetGet(0)
+                ->getMessage(),
+        );
 
         // Nested error is attached to field.
         $tracingData = $this->sampleTracingData();
@@ -142,17 +151,19 @@ class TracingResultTest extends TestCase
             $this->sampleClientData(),
             $this->sampleHttpData(),
             $tracingData,
-            [FormattedError::createFromException(
-                new Error(
-                    'some error',
-                    null,
-                    null,
-                    [],
-                    ['hello', 'world'],
-                    new Exception('internal error message')
+            [
+                FormattedError::createFromException(
+                    new Error(
+                        'some error',
+                        null,
+                        null,
+                        [],
+                        ['hello', 'world'],
+                        new Exception('internal error message'),
+                    ),
+                    ManipulateResultListener::DEBUG_FLAGS,
                 ),
-                ManipulateResultListener::DEBUG_FLAGS
-            )]
+            ],
         );
         $proto = $tracing->getTracingAsProtobuf();
 
@@ -160,11 +171,31 @@ class TracingResultTest extends TestCase
         self::assertNotNull($proto->getRoot());
         self::assertCount(0, $proto->getRoot()->getError());
         self::assertCount(1, $proto->getRoot()->getChild());
-        self::assertEquals('world', $proto->getRoot()->getChild()->offsetGet(0)->getOriginalFieldName());
-        self::assertCount(1, $proto->getRoot()->getChild()->offsetGet(0)->getError());
+        self::assertEquals(
+            'world',
+            $proto
+                ->getRoot()
+                ->getChild()
+                ->offsetGet(0)
+                ->getOriginalFieldName(),
+        );
+        self::assertCount(
+            1,
+            $proto
+                ->getRoot()
+                ->getChild()
+                ->offsetGet(0)
+                ->getError(),
+        );
         self::assertEquals(
             'some error',
-            $proto->getRoot()->getChild()->offsetGet(0)->getError()->offsetGet(0)->getMessage()
+            $proto
+                ->getRoot()
+                ->getChild()
+                ->offsetGet(0)
+                ->getError()
+                ->offsetGet(0)
+                ->getMessage(),
         );
     }
 
@@ -175,7 +206,7 @@ class TracingResultTest extends TestCase
     {
         $error = FormattedError::createFromException(
             new Exception('test'),
-            ManipulateResultListener::DEBUG_FLAGS
+            ManipulateResultListener::DEBUG_FLAGS,
         );
         $proto = TracingResult::getErrorAsProtobuf($error);
 

@@ -85,18 +85,19 @@ class TracingResult
         // In particular, Apollo expects a sort of tree structure, whereas Lighthouse produces a flat array.
         $tracingData = [
             'duration_ns' => $this->tracing['duration'],
-            'end_time' => $this->dateTimeStringToTimestampField($this->tracing['endTime']),
+            'end_time' => $this->dateTimeStringToTimestampField(
+                $this->tracing['endTime'],
+            ),
             'http' => $this->getHttpAsProtobuf(),
-            'start_time' => $this->dateTimeStringToTimestampField($this->tracing['startTime']),
+            'start_time' => $this->dateTimeStringToTimestampField(
+                $this->tracing['startTime'],
+            ),
         ];
         if (!empty($this->client['address'])) {
             $tracingData['client_address'] = $this->client['address'];
         }
         if (!empty($this->client['name'])) {
             $tracingData['client_name'] = $this->client['name'];
-        }
-        if (!empty($this->client['reference_id'])) {
-            $tracingData['client_reference_id'] = $this->client['reference_id'];
         }
         if (!empty($this->client['version'])) {
             $tracingData['client_version'] = $this->client['version'];
@@ -108,6 +109,8 @@ class TracingResult
         }
 
         $result = new Trace($tracingData);
+        /** @var array<string,Trace\Node> $pathTargets */
+        $pathTargets = [];
 
         foreach ($this->tracing['execution']['resolvers'] as $trace) {
             $node = new Trace\Node([
@@ -122,52 +125,58 @@ class TracingResult
             // Add any errors with a matching path.
             $errors = array_map(
                 [$this, 'getErrorAsProtobuf'],
-                array_filter($this->errors, function (array $error) use ($trace) {
-                    return isset($error['path']) && $error['path'] === $trace['path'];
-                })
+                array_filter($this->errors, function (array $error) use (
+                    $trace
+                ) {
+                    return isset($error['path']) &&
+                        $error['path'] === $trace['path'];
+                }),
             );
             if (count($errors) > 0) {
                 $node->setError($errors);
             }
 
+            $selfPathKey = implode('.', $trace['path']);
             if (count($trace['path']) === 1) {
                 $result->setRoot($node);
             } else {
-                /** @var Trace\Node $target */
-                $target = $result->getRoot();
-                foreach (array_slice($trace['path'], 1, -1) as $pathSegment) {
-                    if (is_numeric($pathSegment)) {
-                        $matchingIndex = null;
-                        foreach ($target->getChild() as $child) {
-                            if ($child->getIndex() === $pathSegment) {
-                                $matchingIndex = $child;
-                                break;
-                            }
-                        }
+                $directParent = $trace['path'][count($trace['path']) - 2];
+                $parentPathKey = implode(
+                    '.',
+                    is_numeric($directParent)
+                        ? array_slice($trace['path'], 0, -2)
+                        : array_slice($trace['path'], 0, -1),
+                );
+                $target = $pathTargets[$parentPathKey];
 
-                        if ($matchingIndex !== null) {
-                            $target = $matchingIndex;
-                        } else {
-                            $child = $target->getChild();
-                            $indexNode = new Trace\Node(['index' => $pathSegment]);
-                            $target->setChild(array_merge($this->iteratorToArray($child), [$indexNode]));
-
-                            $target = $indexNode;
+                // If the node is part of a list, find the correct index node. Note that there are
+                // no entries in the tracing from Lighthouse for the individual list elements, that's
+                // why they need to be resolved separately from the pathTargets lookup, as there would
+                // be no entry in the pathTargets lookup table for the direct parent of this node.
+                if (is_numeric($directParent)) {
+                    $matchingIndex = null;
+                    foreach ($target->getChild() as $child) {
+                        if ($child->getIndex() === $directParent) {
+                            $matchingIndex = $child;
+                            break;
                         }
+                    }
+
+                    if ($matchingIndex !== null) {
+                        $target = $matchingIndex;
                     } else {
-                        /** @var Trace\Node $child */
-                        foreach ($target->getChild() as $child) {
-                            if ($child->getResponseName() === $pathSegment) {
-                                $target = $child;
-                                break;
-                            }
-                        }
+                        $indexNode = new Trace\Node(['index' => $directParent]);
+                        $target->getChild()[] = $indexNode;
+
+                        $target = $indexNode;
                     }
                 }
 
-                $child = $target->getChild();
-                $target->setChild(array_merge($this->iteratorToArray($child), [$node]));
+                $target->getChild()[] = $node;
             }
+
+            // Finally, store this node in the lookup for any descendents.
+            $pathTargets[$selfPathKey] = $node;
         }
 
         // Add all errors without a path to the root node.
@@ -175,19 +184,23 @@ class TracingResult
         $rootErrors = array_map(
             [$this, 'getErrorAsProtobuf'],
             array_filter($this->errors, function (array $error) {
-                return empty($error['path']) || empty($this->tracing['execution']['resolvers']);
-            })
+                return empty($error['path']) ||
+                    empty($this->tracing['execution']['resolvers']);
+            }),
         );
         /** @var Trace\Node|null $rootNode */
         $rootNode = $result->getRoot();
         if ($rootNode === null) {
-            $result->setRoot($rootNode = new Trace\Node([
-                'response_name' => '_errors',
-            ]));
+            $result->setRoot(
+                $rootNode = new Trace\Node([
+                    'response_name' => '_errors',
+                ]),
+            );
             $rootNode->setError($rootErrors);
         } else {
-            $existingRootErrors = $rootNode->getError();
-            $rootNode->setError(array_merge($this->iteratorToArray($existingRootErrors), $rootErrors));
+            foreach ($rootErrors as $rootError) {
+                $rootNode->getError()[] = $rootError;
+            }
         }
 
         return $result;
