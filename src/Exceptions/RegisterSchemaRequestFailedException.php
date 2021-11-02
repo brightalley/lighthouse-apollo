@@ -13,6 +13,9 @@ class RegisterSchemaRequestFailedException extends Exception
      */
     public function __construct(int $errorNumber, string $errorMessage)
     {
-        parent::__construct('Request to register schema with Apollo failed: ' . $errorMessage, $errorNumber);
+        parent::__construct(
+            'Request to register schema with Apollo failed: ' . $errorMessage,
+            $errorNumber,
+        );
     }
 }

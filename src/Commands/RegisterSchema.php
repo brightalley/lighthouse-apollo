@@ -21,27 +21,27 @@ use Nuwave\Lighthouse\Schema\Source\SchemaSourceProvider;
 class RegisterSchema extends Command
 {
     private const UPLOAD_SCHEMA_MUTATION = <<<'EOT'
-mutation UploadSchema(
-  $id: ID!
-  $schemaDocument: String!
-  $tag: String!
-  $gitContext: GitContextInput
-) {
-  service(id: $id) {
-    uploadSchema(schemaDocument: $schemaDocument, tag: $tag, gitContext: $gitContext) {
-      code
-      message
-      success
-      tag {
-        tag
-        schema {
-          hash
+    mutation UploadSchema(
+      $id: ID!
+      $schemaDocument: String!
+      $tag: String!
+      $gitContext: GitContextInput
+    ) {
+      service(id: $id) {
+        uploadSchema(schemaDocument: $schemaDocument, tag: $tag, gitContext: $gitContext) {
+          code
+          message
+          success
+          tag {
+            tag
+            schema {
+              hash
+            }
+          }
         }
       }
     }
-  }
-}
-EOT;
+    EOT;
 
     /**
      * The name and signature of the console command.
@@ -66,8 +66,11 @@ EOT;
      * @param Config $config
      * @param SchemaSourceProvider $schemaSourceProvider
      */
-    public function __construct(Application $app, Config $config, SchemaSourceProvider $schemaSourceProvider)
-    {
+    public function __construct(
+        Application $app,
+        Config $config,
+        SchemaSourceProvider $schemaSourceProvider
+    ) {
         parent::__construct();
 
         $this->app = $app;
@@ -92,16 +95,21 @@ EOT;
             $this->getGitContext(),
         );
 
-        $response = ($this->sendSchemaToApollo($variables));
+        $response = $this->sendSchemaToApollo($variables);
         if (!empty($response['errors'])) {
-            throw new RegisterSchemaFailedException(implode(', ', array_map(function (array $error): string {
-                return $error['message'];
-            }, $response['errors'])));
+            throw new RegisterSchemaFailedException(
+                implode(
+                    ', ',
+                    array_map(function (array $error): string {
+                        return $error['message'];
+                    }, $response['errors']),
+                ),
+            );
         }
 
         $this->output->success(
             'Upload schema succeeded. Response from Apollo Studio: ' .
-            var_export($response['data']['service']['uploadSchema'], true)
+                var_export($response['data']['service']['uploadSchema'], true),
         );
     }
 
@@ -111,19 +119,26 @@ EOT;
      * @throws RegisterSchemaRequestFailedException
      * @throws JsonException
      */
-    protected function sendSchemaToApollo(UploadSchemaVariables $variables): array
-    {
-        $request = curl_init($this->config->get('lighthouse-apollo.schema_reporting_endpoint'));
+    protected function sendSchemaToApollo(
+        UploadSchemaVariables $variables
+    ): array {
+        $request = curl_init(
+            $this->config->get('lighthouse-apollo.schema_reporting_endpoint'),
+        );
         curl_setopt_array($request, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => json_encode([
-                'query' => self::UPLOAD_SCHEMA_MUTATION,
-                'variables' => $variables->toArray(),
-            ], JSON_THROW_ON_ERROR),
+            CURLOPT_POSTFIELDS => json_encode(
+                [
+                    'query' => self::UPLOAD_SCHEMA_MUTATION,
+                    'variables' => $variables->toArray(),
+                ],
+                JSON_THROW_ON_ERROR,
+            ),
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
-                'X-Api-Key: ' . $this->config->get('lighthouse-apollo.apollo_key'),
+                'X-Api-Key: ' .
+                $this->config->get('lighthouse-apollo.apollo_key'),
                 'User-Agent: Lighthouse-Apollo',
             ],
         ]);
@@ -132,7 +147,10 @@ EOT;
 
         $errorCode = curl_errno($request);
         if ($errorCode || !is_string($response)) {
-            throw new RegisterSchemaRequestFailedException($errorCode, curl_error($request));
+            throw new RegisterSchemaRequestFailedException(
+                $errorCode,
+                curl_error($request),
+            );
         }
 
         return json_decode($response, true, 512, JSON_THROW_ON_ERROR);
@@ -156,7 +174,7 @@ EOT;
             $lastCommitId,
             $commitData['author'],
             $commitData['subject'],
-            null
+            null,
         );
     }
 }

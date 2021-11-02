@@ -23,14 +23,17 @@ class RedisConnector
      */
     public function __construct(Repository $config, RedisFactory $redis)
     {
-        $this->redis = $redis->connection($config->get('lighthouse-apollo.redis_connection'));
+        $this->redis = $redis->connection(
+            $config->get('lighthouse-apollo.redis_connection'),
+        );
 
         $redisInfo = $this->redis->command('info', ['server']);
-        $this->redisSupportsLpopWithCount = version_compare(
-            $redisInfo['Server']['redis_version'] ?? '1.0.0',
-            '6.2.0',
-            '>='
-        ) === true;
+        $this->redisSupportsLpopWithCount =
+            version_compare(
+                $redisInfo['Server']['redis_version'] ?? '1.0.0',
+                '6.2.0',
+                '>=',
+            ) === true;
     }
 
     /**
@@ -50,9 +53,12 @@ class RedisConnector
      */
     public function putMany(array $tracings): void
     {
-        $this->redis->command('rpush', [self::REDIS_KEY, ...array_map(static function (TracingResult $tracingResult) {
-            return serialize($tracingResult);
-        }, $tracings)]);
+        $this->redis->command('rpush', [
+            self::REDIS_KEY,
+            ...array_map(static function (TracingResult $tracingResult) {
+                return serialize($tracingResult);
+            }, $tracings),
+        ]);
     }
 
     /**
@@ -73,21 +79,27 @@ class RedisConnector
     protected function fetchTracingsFromRedis(int $count): array
     {
         if ($this->redisSupportsLpopWithCount) {
-             $result = $this->redis->command('lpop', [self::REDIS_KEY, $count]) ?? [];
+            $result =
+                $this->redis->command('lpop', [self::REDIS_KEY, $count]) ?? [];
         } else {
             $result = [];
             while (
                 count($result) < $count &&
-                $serializedTracingResult = $this->redis->command('lpop', [self::REDIS_KEY])
+                ($serializedTracingResult = $this->redis->command('lpop', [
+                    self::REDIS_KEY,
+                ]))
             ) {
                 $result[] = $serializedTracingResult;
             }
         }
 
         return array_map(
-            static fn(string $serializedTracingResult): TracingResult =>
-                unserialize($serializedTracingResult, ['allowed_classes' => [TracingResult::class]]),
-            $result
+            static fn(
+                string $serializedTracingResult
+            ): TracingResult => unserialize($serializedTracingResult, [
+                'allowed_classes' => [TracingResult::class],
+            ]),
+            $result,
         );
     }
 }

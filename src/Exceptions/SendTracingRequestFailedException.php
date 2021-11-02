@@ -13,6 +13,9 @@ class SendTracingRequestFailedException extends Exception
      */
     public function __construct(int $errorNumber, string $errorMessage)
     {
-        parent::__construct('Request to send tracing to Apollo failed: ' . $errorMessage, $errorNumber);
+        parent::__construct(
+            'Request to send tracing to Apollo failed: ' . $errorMessage,
+            $errorNumber,
+        );
     }
 }

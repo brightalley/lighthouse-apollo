@@ -44,8 +44,15 @@ jobs:
       - name: "Install dependencies with composer"
         run: "composer require illuminate/contracts:${{ matrix.laravel-version }} --no-interaction --prefer-dist --no-interaction"
 
-      - name: "Run phpcs"
-        run: "vendor/bin/phpcs --standard=PSR12 src"
+      - name: "Install dependencies with yarn"
+        uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: install
+
+      - name: "Run prettier"
+        uses: borales/actions-yarn@v2.3.0
+        with:
+          cmd: "prettier --check src tests"
 
       - name: "Run psalm"
         run: "vendor/bin/psalm"

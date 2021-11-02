@@ -33,7 +33,8 @@ class SubmitTracing extends Command
      * @param Config $config
      * @param RedisConnector $redisConnector
      */
-    public function __construct(Config $config, RedisConnector $redisConnector) {
+    public function __construct(Config $config, RedisConnector $redisConnector)
+    {
         parent::__construct();
 
         $this->config = $config;
@@ -45,16 +46,22 @@ class SubmitTracing extends Command
      */
     public function handle(): void
     {
-        $sendTracingMode = $this->config->get('lighthouse-apollo.send_tracing_mode');
+        $sendTracingMode = $this->config->get(
+            'lighthouse-apollo.send_tracing_mode',
+        );
         switch ($sendTracingMode) {
             case 'sync':
-                $this->output->writeln('Send tracing mode is set to "sync", nothing to do.');
+                $this->output->writeln(
+                    'Send tracing mode is set to "sync", nothing to do.',
+                );
                 break;
             case 'redis':
                 $this->handleFromRedis();
                 break;
             default:
-                $this->output->error('Tracing mode "' . $sendTracingMode . '" is not supported.');
+                $this->output->error(
+                    'Tracing mode "' . $sendTracingMode . '" is not supported.',
+                );
         }
 
         $this->output->writeln('All done!');
@@ -70,11 +77,12 @@ class SubmitTracing extends Command
                 break;
             }
 
-            $this->output->writeln('Sending ' . count($tracings) . ' tracing(s) to Apollo Studio');
+            $this->output->writeln(
+                'Sending ' . count($tracings) . ' tracing(s) to Apollo Studio',
+            );
 
             try {
-                (new SendTracingToApollo($this->config, $tracings))
-                    ->send();
+                (new SendTracingToApollo($this->config, $tracings))->send();
             } catch (Exception $e) {
                 $this->error('An error occurred submitting tracings:');
                 $this->error($e->getMessage());

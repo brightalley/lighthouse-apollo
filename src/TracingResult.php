@@ -80,9 +80,13 @@ class TracingResult
         // In particular, Apollo expects a sort of tree structure, whereas Lighthouse produces a flat array.
         $tracingData = [
             'duration_ns' => $this->tracing['duration'],
-            'end_time' => $this->dateTimeStringToTimestampField($this->tracing['endTime']),
+            'end_time' => $this->dateTimeStringToTimestampField(
+                $this->tracing['endTime'],
+            ),
             'http' => $this->getHttpAsProtobuf(),
-            'start_time' => $this->dateTimeStringToTimestampField($this->tracing['startTime']),
+            'start_time' => $this->dateTimeStringToTimestampField(
+                $this->tracing['startTime'],
+            ),
         ];
         if (!empty($this->client['address'])) {
             $tracingData['client_address'] = $this->client['address'];
@@ -116,9 +120,12 @@ class TracingResult
             // Add any errors with a matching path.
             $errors = array_map(
                 [$this, 'getErrorAsProtobuf'],
-                array_filter($this->errors, function (array $error) use ($trace) {
-                    return isset($error['path']) && $error['path'] === $trace['path'];
-                })
+                array_filter($this->errors, function (array $error) use (
+                    $trace
+                ) {
+                    return isset($error['path']) &&
+                        $error['path'] === $trace['path'];
+                }),
             );
             if (count($errors) > 0) {
                 $node->setError($errors);
@@ -133,7 +140,7 @@ class TracingResult
                     '.',
                     is_numeric($directParent)
                         ? array_slice($trace['path'], 0, -2)
-                        : array_slice($trace['path'], 0, -1)
+                        : array_slice($trace['path'], 0, -1),
                 );
                 $target = $pathTargets[$parentPathKey];
 
@@ -172,15 +179,18 @@ class TracingResult
         $rootErrors = array_map(
             [$this, 'getErrorAsProtobuf'],
             array_filter($this->errors, function (array $error) {
-                return empty($error['path']) || empty($this->tracing['execution']['resolvers']);
-            })
+                return empty($error['path']) ||
+                    empty($this->tracing['execution']['resolvers']);
+            }),
         );
         /** @var Trace\Node|null $rootNode */
         $rootNode = $result->getRoot();
         if ($rootNode === null) {
-            $result->setRoot($rootNode = new Trace\Node([
-                'response_name' => '_errors',
-            ]));
+            $result->setRoot(
+                $rootNode = new Trace\Node([
+                    'response_name' => '_errors',
+                ]),
+            );
             $rootNode->setError($rootErrors);
         } else {
             foreach ($rootErrors as $rootError) {
