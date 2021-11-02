@@ -190,7 +190,7 @@ class SendTracingToApollo
         }
 
         // Write the report in a format that protoc will understand, then close stdin so protoc knows we're done.
-        $this->writeProtobufValue($pipes[0], $report);
+        $this->writeProtobufValue($pipes[0], $report, true);
         fclose($pipes[0]);
 
         // Read the output.
@@ -218,59 +218,39 @@ class SendTracingToApollo
      *
      * @param resource $process
      * @param mixed $value
-     * @param int $depth
-     * @param bool $startInline Whether the value starts inline with other content. Skip the leading indentation if set.
+     * @param bool $isRootObject
      */
     private function writeProtobufValue(
         $process,
         $value,
-        int $depth = 0,
-        bool $startInline = false
+        bool $isRootObject = false
     ): void {
         if (is_bool($value)) {
-            fwrite(
-                $process,
-                ($startInline ? '' : str_repeat(' ', $depth)) . $value
-                    ? 'true'
-                    : 'false',
-            );
+            fwrite($process, $value ? 'true' : 'false');
         } elseif (is_float($value) || is_int($value)) {
-            fwrite(
-                $process,
-                ($startInline ? '' : str_repeat(' ', $depth)) . $value,
-            );
+            fwrite($process, (string) $value);
         } elseif (is_string($value)) {
             fwrite(
                 $process,
-                ($startInline ? '' : str_repeat(' ', $depth)) .
-                    json_encode(
-                        $value,
-                        JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES,
-                    ),
+                json_encode(
+                    $value,
+                    JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES,
+                ),
             );
         } elseif ($value instanceof RepeatedField) {
-            fwrite(
-                $process,
-                ($startInline ? '' : str_repeat(' ', $depth)) . '[' . PHP_EOL,
-            );
+            fwrite($process, '[');
             $count = count($value);
             foreach ($value as $key => $item) {
-                $this->writeProtobufValue($process, $item, $depth + 1);
-                fwrite($process, ($key === $count - 1 ? '' : ',') . PHP_EOL);
+                $this->writeProtobufValue($process, $item);
+                fwrite($process, $key === $count - 1 ? '' : ',');
             }
-            fwrite($process, str_repeat(' ', $depth) . ']');
+            fwrite($process, ']');
         } elseif ($value instanceof Message) {
-            $isRootObject = $depth === 0;
             if (!$isRootObject) {
-                fwrite(
-                    $process,
-                    ($startInline ? '' : str_repeat(' ', $depth)) .
-                        '{' .
-                        PHP_EOL,
-                );
+                fwrite($process, '{');
             }
-            ++$depth;
 
+            $first = true;
             foreach ($this->getMessageProperties($value) as $name => $getter) {
                 $propertyValue = $value->$getter();
                 if (
@@ -282,45 +262,30 @@ class SendTracingToApollo
                     continue;
                 }
 
-                fwrite($process, str_repeat(' ', $depth) . $name . ': ');
-                $this->writeProtobufValue(
-                    $process,
-                    $propertyValue,
-                    $depth,
-                    true,
-                );
-                fwrite($process, PHP_EOL);
+                fwrite($process, ($first ? '' : ';') . $name . ': ');
+                $this->writeProtobufValue($process, $propertyValue);
+
+                $first = false;
             }
-            --$depth;
             if (!$isRootObject) {
-                fwrite($process, str_repeat(' ', $depth) . '}');
+                fwrite($process, '}');
             }
         } elseif ($value instanceof MapField) {
-            fwrite($process, '[' . PHP_EOL);
-            ++$depth;
+            fwrite($process, '[');
             $first = true;
             foreach ($value as $key => $child) {
-                fwrite(
-                    $process,
-                    ($first ? '' : ',' . PHP_EOL) .
-                        str_repeat(' ', $depth) .
-                        '{' .
-                        PHP_EOL,
-                );
+                fwrite($process, ($first ? '' : ',') . '{');
                 $first = false;
 
-                ++$depth;
-                fwrite($process, str_repeat(' ', $depth) . 'key: ');
-                $this->writeProtobufValue($process, $key, $depth + 1, true);
+                fwrite($process, 'key: ');
+                $this->writeProtobufValue($process, $key);
 
-                fwrite($process, PHP_EOL . str_repeat(' ', $depth) . 'value: ');
-                $this->writeProtobufValue($process, $child, $depth + 1, true);
+                fwrite($process, 'value: ');
+                $this->writeProtobufValue($process, $child);
 
-                --$depth;
-                fwrite($process, PHP_EOL . str_repeat(' ', $depth) . '}');
+                fwrite($process, '}');
             }
-            --$depth;
-            fwrite($process, PHP_EOL . str_repeat(' ', $depth) . ']');
+            fwrite($process, ']');
         } else {
             throw new LogicException(
                 'Unsupported value type: ' .
