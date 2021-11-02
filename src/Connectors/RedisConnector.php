@@ -73,7 +73,7 @@ class RedisConnector
     protected function fetchTracingsFromRedis(int $count): array
     {
         if ($this->redisSupportsLpopWithCount) {
-             $result = $this->redis->command('lpop', [self::REDIS_KEY, $count]);
+             $result = $this->redis->command('lpop', [self::REDIS_KEY, $count]) ?? [];
         } else {
             $result = [];
             while (
