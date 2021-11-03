@@ -142,6 +142,52 @@ class TracingResult
                         ? array_slice($trace['path'], 0, -2)
                         : array_slice($trace['path'], 0, -1),
                 );
+
+                // It seems that in some cases, a node is missing in Lighthouse's tracings. Not sure if that's a
+                // bug or if it's on purpose. In any case, we need to deal with that to insert the missing node.
+                if (!isset($pathTargets[$parentPathKey])) {
+                    // First, find all segments of the path that are missing in pathTargets. Keep track of the list
+                    // of missing nodes, and where to start adding them (the closest existing parent). Usually this
+                    // will end up being one node higher than the direct parent.
+                    /** @var array<string,string> $missingNodes */
+                    $missingNodes = [];
+                    /** @var Trace\Node $addNodesTo */
+                    $addNodesTo = $result->getRoot();
+                    for (
+                        $i =
+                            count($trace['path']) -
+                            (is_numeric($directParent) ? 2 : 1);
+                        $i > 1;
+                        --$i
+                    ) {
+                        $partialPath = implode(
+                            '.',
+                            array_slice($trace['path'], 0, $i),
+                        );
+                        if (!isset($pathTargets[$partialPath])) {
+                            // This is like array_unshift, but keeping the array keys intact.
+                            $missingNodes =
+                                [$partialPath => $trace['path'][$i]] +
+                                $missingNodes;
+                        } else {
+                            $addNodesTo = $pathTargets[$partialPath];
+                            break;
+                        }
+                    }
+
+                    // Then just iterate over the missing nodes and add them.
+                    foreach ($missingNodes as $path => $missingNode) {
+                        $node = new Trace\Node([
+                            'response_name' => $missingNode,
+                        ]);
+                        $addNodesTo->getChild()[] = $node;
+
+                        $pathTargets[$path] = $node;
+                        $addNodesTo = $node;
+                    }
+                }
+
+                /** @var Trace\Node $target */
                 $target = $pathTargets[$parentPathKey];
 
                 // If the node is part of a list, find the correct index node. Note that there are
