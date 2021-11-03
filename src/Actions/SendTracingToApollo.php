@@ -272,7 +272,7 @@ class SendTracingToApollo
                     continue;
                 }
 
-                fwrite($process, ($first ? '' : ';') . $name . ': ');
+                fwrite($process, ($first ? '' : ';') . $name . ':');
                 $this->writeProtobufValue($process, $propertyValue);
 
                 $first = false;
@@ -287,10 +287,10 @@ class SendTracingToApollo
                 fwrite($process, ($first ? '' : ',') . '{');
                 $first = false;
 
-                fwrite($process, 'key: ');
+                fwrite($process, 'key:');
                 $this->writeProtobufValue($process, $key);
 
-                fwrite($process, 'value: ');
+                fwrite($process, ';value:');
                 $this->writeProtobufValue($process, $child);
 
                 fwrite($process, '}');

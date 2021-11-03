@@ -4,6 +4,7 @@ namespace BrightAlley\Tests;
 
 use BrightAlley\LighthouseApollo\Listeners\ManipulateResultListener;
 use BrightAlley\LighthouseApollo\TracingResult;
+use BrightAlley\Tests\Support\QueryType;
 use BrightAlley\Tests\Support\UsesSampleData;
 use Exception;
 use GraphQL\Error\Error;
@@ -13,6 +14,11 @@ use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\StringType;
 use GraphQL\Type\Schema;
 use Illuminate\Support\Str;
+use Mdg\Trace;
+use Nuwave\Lighthouse\Events\BuildExtensionsResponse;
+use Nuwave\Lighthouse\Events\StartExecution;
+use Nuwave\Lighthouse\Events\StartRequest;
+use Nuwave\Lighthouse\Tracing\Tracing;
 use PHPUnit\Framework\TestCase;
 
 class TracingResultTest extends TestCase
@@ -197,6 +203,35 @@ class TracingResultTest extends TestCase
                 ->offsetGet(0)
                 ->getMessage(),
         );
+    }
+
+    /**
+     * @covers \BrightAlley\LighthouseApollo\TracingResult::getTracingAsProtobuf
+     */
+    public function testGetTracingAsProtobufMissingLink(): void
+    {
+        $tracingData = $this->sampleTracingData();
+        $tracingData['execution']['resolvers'][] = [
+            'path' => ['hello', 'nested', 'world'],
+            'parentType' => 'String',
+            'returnType' => 'String',
+            'fieldName' => 'world',
+            'startOffset' => microtime(true),
+            'duration' => 500,
+        ];
+
+        $tracing = new TracingResult(
+            '{ hello { nested { world } } }',
+            null,
+            null,
+            $this->sampleClientData(),
+            $this->sampleHttpData(),
+            $tracingData,
+            [],
+        );
+        $proto = $tracing->getTracingAsProtobuf();
+
+        $this->assertInstanceOf(Trace::class, $proto);
     }
 
     /**
