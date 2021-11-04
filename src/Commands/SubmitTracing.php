@@ -82,10 +82,13 @@ class SubmitTracing extends Command
                 if (strpos($e->getMessage(), 'skewed timestamp') === false) {
                     // Put the tracings back on the queue.
                     $this->redisConnector->putMany($tracings);
+
+                    // Indicate we encountered an error.
+                    return false;
                 }
 
-                // Indicate we encountered an error.
-                return false;
+                // Note that if the error was a skewed timestamp, we can just keep going to
+                // try to keep up with the pending traces.
             }
         });
 
