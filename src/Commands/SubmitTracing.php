@@ -67,14 +67,7 @@ class SubmitTracing extends Command
 
     private function handleFromRedis(): int
     {
-        while (true) {
-            $tracings = $this->redisConnector->getPending();
-            if (count($tracings) === 0) {
-                $this->output->warning('No pending tracings on Redis.');
-
-                return 0;
-            }
-
+        $total = $this->redisConnector->chunk(function (array $tracings) {
             $this->output->writeln(
                 'Sending ' . count($tracings) . ' tracing(s) to Apollo Studio',
             );
@@ -91,8 +84,18 @@ class SubmitTracing extends Command
                     $this->redisConnector->putMany($tracings);
                 }
 
-                return 1;
+                // Indicate we encountered an error.
+                return false;
             }
+        });
+
+        if ($total === false) {
+            return 1;
+        }
+
+        if ($total === 0) {
+            $this->output->warning('No pending tracings on Redis.');
+            return 0;
         }
 
         $this->output->writeln('All done!');
