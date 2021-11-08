@@ -5,6 +5,7 @@ namespace BrightAlley\LighthouseApollo;
 use DateTime;
 use Exception;
 use Google\Protobuf\Timestamp;
+use LogicException;
 use Mdg\Trace;
 
 class TracingResult
@@ -167,7 +168,7 @@ class TracingResult
                         if (!isset($pathTargets[$partialPath])) {
                             // This is like array_unshift, but keeping the array keys intact.
                             $missingNodes =
-                                [$partialPath => $trace['path'][$i]] +
+                                [$partialPath => $trace['path'][$i - 1]] +
                                 $missingNodes;
                         } else {
                             $addNodesTo = $pathTargets[$partialPath];
@@ -177,13 +178,19 @@ class TracingResult
 
                     // Then just iterate over the missing nodes and add them.
                     foreach ($missingNodes as $path => $missingNode) {
-                        $node = new Trace\Node([
+                        if (is_numeric($missingNode)) {
+                            throw new LogicException(
+                                'The missing node should never be numeric.',
+                            );
+                        }
+
+                        $nodeToInsert = new Trace\Node([
                             'response_name' => $missingNode,
                         ]);
-                        $addNodesTo->getChild()[] = $node;
+                        $addNodesTo->getChild()[] = $nodeToInsert;
 
-                        $pathTargets[$path] = $node;
-                        $addNodesTo = $node;
+                        $pathTargets[$path] = $nodeToInsert;
+                        $addNodesTo = $nodeToInsert;
                     }
                 }
 
