@@ -287,23 +287,6 @@ class TracingResult
         return $timestamp;
     }
 
-    /**
-     * Turn an iterable into an array.
-     *
-     * @template T
-     * @param iterable<T> $iter
-     * @return array<T>
-     */
-    private function iteratorToArray(iterable $iter): array
-    {
-        $result = [];
-        foreach ($iter as $element) {
-            $result[] = $element;
-        }
-
-        return $result;
-    }
-
     protected function getHttpAsProtobuf(): Trace\HTTP
     {
         $http = $this->http;
