@@ -25,20 +25,16 @@ class SubmitTracing extends Command
 
     private Config $config;
 
-    private RedisConnector $redisConnector;
-
     /**
      * Create a new console command instance.
      *
      * @param Config $config
-     * @param RedisConnector $redisConnector
      */
-    public function __construct(Config $config, RedisConnector $redisConnector)
+    public function __construct(Config $config)
     {
         parent::__construct();
 
         $this->config = $config;
-        $this->redisConnector = $redisConnector;
     }
 
     /**
@@ -56,7 +52,9 @@ class SubmitTracing extends Command
                 );
                 return 0;
             case 'redis':
-                return $this->handleFromRedis();
+                return $this->handleFromRedis(
+                    $this->laravel->make(RedisConnector::class),
+                );
             default:
                 $this->output->error(
                     'Tracing mode "' . $sendTracingMode . '" is not supported.',
@@ -65,9 +63,9 @@ class SubmitTracing extends Command
         }
     }
 
-    private function handleFromRedis(): int
+    private function handleFromRedis(RedisConnector $connector): int
     {
-        $total = $this->redisConnector->chunk(function (array $tracings) {
+        $total = $connector->chunk(function (array $tracings) use ($connector) {
             $this->output->writeln(
                 'Sending ' . count($tracings) . ' tracing(s) to Apollo Studio',
             );
@@ -81,7 +79,7 @@ class SubmitTracing extends Command
                 // If the traces are not considered too old, put them back to retry later.
                 if (strpos($e->getMessage(), 'skewed timestamp') === false) {
                     // Put the tracings back on the queue.
-                    $this->redisConnector->putMany($tracings);
+                    $connector->putMany($tracings);
 
                     // Indicate we encountered an error.
                     return false;
