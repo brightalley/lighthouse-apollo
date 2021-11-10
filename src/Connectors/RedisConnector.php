@@ -62,6 +62,42 @@ class RedisConnector
     }
 
     /**
+     * Fetch the pending traces from Redis in chunks.
+     *
+     * @template T
+     * @param int $chunkSize
+     * @param callable(array<int,TracingResult>): T $callback
+     * @return T|int
+     */
+    public function chunk(callable $callback, int $chunkSize = 100)
+    {
+        // Get the total count, and then fetch them in chunks.
+        $total = $this->redis->command('llen', [self::REDIS_KEY]);
+        $fetched = 0;
+
+        while ($fetched < $total) {
+            $amountToFetch = min($chunkSize, $total - $fetched);
+            if ($amountToFetch === 0) {
+                break;
+            }
+
+            $chunk = $this->fetchTracingsFromRedis($amountToFetch);
+            if (count($chunk) === 0) {
+                break;
+            }
+
+            $fetched += count($chunk);
+            $result = $callback($chunk);
+            if ($result !== null) {
+                return $result;
+            }
+        }
+
+        return $fetched;
+    }
+
+    /**
+     * @deprecated Use chunk() instead.
      * @return array<int,TracingResult>
      */
     public function getPending(int $limit = 100): array

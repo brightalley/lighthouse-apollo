@@ -10,6 +10,7 @@ use Google\Protobuf\Internal\MapField;
 use Google\Protobuf\Internal\Message;
 use Google\Protobuf\Internal\RepeatedField;
 use Illuminate\Contracts\Config\Repository as Config;
+use Illuminate\Support\Str;
 use LogicException;
 use Mdg\Report;
 use Mdg\ReportHeader;
@@ -17,6 +18,9 @@ use Mdg\Trace\Node;
 use Mdg\TracesAndStats;
 use ReflectionClass;
 
+/**
+ * @psalm-type MessageGetter = Closure(Message): array{string, mixed}
+ */
 class SendTracingToApollo
 {
     /**
@@ -27,7 +31,7 @@ class SendTracingToApollo
     private Config $config;
 
     /**
-     * @var array<string,array<string,string>>
+     * @var array<string,MessageGetter[]>
      */
     private array $messagePropertyGetters = [];
 
@@ -261,8 +265,8 @@ class SendTracingToApollo
             }
 
             $first = true;
-            foreach ($this->getMessageProperties($value) as $name => $getter) {
-                $propertyValue = $value->$getter();
+            foreach ($this->getMessageProperties($value) as $getter) {
+                [$name, $propertyValue] = $getter($value);
                 if (
                     $propertyValue === null ||
                     $propertyValue === '' ||
@@ -306,7 +310,7 @@ class SendTracingToApollo
 
     /**
      * @param Message $value
-     * @return array<string,string>
+     * @return MessageGetter[]
      */
     private function getMessageProperties(Message $value): array
     {
@@ -315,21 +319,38 @@ class SendTracingToApollo
             return $this->messagePropertyGetters[$class];
         }
 
+        /** @var MessageGetter[] */
         $result = [];
         $reflection = new ReflectionClass($value);
         foreach ($reflection->getProperties() as $property) {
             // Should have a getter, otherwise it's not relevant for us.
-            $getter = 'get' . str_replace('_', '', $property->getName());
+            $propertyName = $property->getName();
+            $formattedName = Str::snake($propertyName);
+            $getter = 'get' . str_replace('_', '', $propertyName);
             if (!$reflection->hasMethod($getter)) {
                 continue;
             }
 
             // Special-case this "oneof" property.
-            if ($value instanceof Node && $property->getName() === 'id') {
+            if ($value instanceof Node && $propertyName === 'id') {
+                $result[] = function (Message $node): array {
+                    if (!($node instanceof Node)) {
+                        return ['', null];
+                    }
+
+                    $propertyName = $node->getId();
+                    $getter = 'get' . str_replace('_', '', $propertyName);
+
+                    return [$propertyName, $node->$getter()];
+                };
+
                 continue;
             }
 
-            $result[$property->getName()] = $getter;
+            $result[] = fn(Message $message): array => [
+                $formattedName,
+                $message->$getter(),
+            ];
         }
 
         return $this->messagePropertyGetters[$class] = $result;
