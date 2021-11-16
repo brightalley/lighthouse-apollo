@@ -14,6 +14,7 @@ use GraphQL\Error\Error;
 use GraphQL\Error\FormattedError;
 use GraphQL\Language\Printer;
 use Illuminate\Contracts\Config\Repository as Config;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use JsonException;
@@ -31,7 +32,7 @@ class ManipulateResultListener
 
     private Config $config;
 
-    private RedisConnector $redisConnector;
+    private Container $container;
 
     private Request $request;
 
@@ -42,21 +43,21 @@ class ManipulateResultListener
      *
      * @param ClientInformationExtractor $clientInformationExtractor
      * @param Config $config
+     * @param Container $container
      * @param QueryRequestStack $requestStack
-     * @param RedisConnector $redisConnector
      * @param Request $request
      */
     public function __construct(
         ClientInformationExtractor $clientInformationExtractor,
         Config $config,
+        Container $container,
         QueryRequestStack $requestStack,
-        RedisConnector $redisConnector,
         Request $request
     ) {
         $this->clientInformationExtractor = $clientInformationExtractor;
         $this->config = $config;
+        $this->container = $container;
         $this->requestStack = $requestStack;
-        $this->redisConnector = $redisConnector;
         $this->request = $request;
     }
 
@@ -125,7 +126,9 @@ class ManipulateResultListener
                 }
                 break;
             case 'redis':
-                $this->redisConnector->put($trace);
+                /** @var RedisConnector $redisConnector */
+                $redisConnector = $this->container->make(RedisConnector::class);
+                $redisConnector->put($trace);
                 break;
             case 'database':
                 throw new LogicException('Not yet implemented.');
