@@ -8,7 +8,7 @@ use BrightAlley\LighthouseApollo\Contracts\ClientInformationExtractor;
 use BrightAlley\LighthouseApollo\Listeners\EndExecutionListener;
 use BrightAlley\LighthouseApollo\Listeners\ManipulateResultListener;
 use BrightAlley\LighthouseApollo\Listeners\StartExecutionListener;
-use Illuminate\Support\Facades\Event;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Nuwave\Lighthouse\Events\EndExecution;
 use Nuwave\Lighthouse\Events\ManipulateResult;
@@ -43,9 +43,14 @@ class ServiceProvider extends BaseServiceProvider
             'lighthouse-apollo',
         );
 
-        Event::listen(StartExecution::class, StartExecutionListener::class);
-        Event::listen(ManipulateResult::class, ManipulateResultListener::class);
-        Event::listen(EndExecution::class, EndExecutionListener::class);
+        /** @var Dispatcher $events */
+        $events = $this->app->make(Dispatcher::class);
+        $events->listen(StartExecution::class, StartExecutionListener::class);
+        $events->listen(
+            ManipulateResult::class,
+            ManipulateResultListener::class,
+        );
+        $events->listen(EndExecution::class, EndExecutionListener::class);
     }
 
     private function bootForConsole(): void
