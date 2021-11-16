@@ -1,13 +1,15 @@
 # Laravel Lighthouse Apollo Integration
 
 This library allows integrating your Lighthouse GraphQL project with Apollo Studio,
-sending tracing statistics and allowing you to send your schema to Apollo for 
+sending tracing statistics and allowing you to send your schema to Apollo for
 breaking changes notifications.
 
 ## Requirements
 
 - PHP 7.4 or newer
-- Tested with Laravel 8 and Lighthouse 4.17
+- Tested with Laravel 8 and Lighthouse 5.26
+
+For Lighthouse 4.x, use version `1.x` of this library.
 
 ## Installation
 
@@ -41,7 +43,7 @@ public function schedule(\Illuminate\Console\Scheduling\Schedule $schedule)
 ## Client tracing
 
 You can gather information about which clients are calling your GraphQL API. If you have
-control over the clients, add the `x-apollo-client-name` and `x-apollo-client-version` 
+control over the clients, add the `x-apollo-client-name` and `x-apollo-client-version`
 headers to your GraphQL requests, and they will be gathered and sent to Apollo Studio.
 
 If you need more control over client tracing on the server side, you can create your own
@@ -55,7 +57,7 @@ $this->app->bind(ClientInformationExtractor::class, MyCustomClientInformationExt
 
 ## Development
 
-Protobuf is used for sending traces to Apollo Studio. To generate new stubs, use the 
+Protobuf is used for sending traces to Apollo Studio. To generate new stubs, use the
 following command:
 
 `protoc -I resources --php_out=generated/ resources/*.proto`
