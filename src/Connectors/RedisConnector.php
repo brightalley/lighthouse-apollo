@@ -72,7 +72,7 @@ class RedisConnector
     public function chunk(callable $callback, int $chunkSize = 100)
     {
         // Get the total count, and then fetch them in chunks.
-        $total = $this->redis->command('llen', [self::REDIS_KEY]);
+        $total = (int) $this->redis->command('llen', [self::REDIS_KEY]);
         $fetched = 0;
 
         while ($fetched < $total) {
@@ -103,7 +103,7 @@ class RedisConnector
     public function getPending(int $limit = 100): array
     {
         // Check the number of results in the redis key, so we can take them all.
-        $length = $this->redis->command('llen', [self::REDIS_KEY]);
+        $length = (int) $this->redis->command('llen', [self::REDIS_KEY]);
         $resultsToFetch = min($length, $limit);
 
         return $this->fetchTracingsFromRedis($resultsToFetch);
@@ -115,9 +115,11 @@ class RedisConnector
     protected function fetchTracingsFromRedis(int $count): array
     {
         if ($this->redisSupportsLpopWithCount) {
+            /** @var string[] $result */
             $result =
                 $this->redis->command('lpop', [self::REDIS_KEY, $count]) ?? [];
         } else {
+            /** @var string[] $result */
             $result = [];
             while (
                 count($result) < $count &&
