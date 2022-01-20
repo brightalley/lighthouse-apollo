@@ -41,7 +41,9 @@ trait UsesSampleData
     {
         $tracing = new Tracing();
         if (method_exists($tracing, 'handleStartRequest')) {
-            $tracing->handleStartRequest($this->createMock(StartRequest::class));
+            $tracing->handleStartRequest(
+                $this->createMock(StartRequest::class),
+            );
         }
         $tracing->handleStartExecution(
             $this->createMock(StartExecution::class),
