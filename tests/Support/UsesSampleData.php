@@ -40,7 +40,9 @@ trait UsesSampleData
     private function sampleTracingData(): array
     {
         $tracing = new Tracing();
-        $tracing->handleStartRequest($this->createMock(StartRequest::class));
+        if (method_exists($tracing, 'handleStartRequest')) {
+            $tracing->handleStartRequest($this->createMock(StartRequest::class));
+        }
         $tracing->handleStartExecution(
             $this->createMock(StartExecution::class),
         );
