@@ -33,6 +33,7 @@ jobs:
           # Older dev-tools don't properly support PHP 8.1.
           - php-version: 8.1
             composer-flags: --prefer-lowest
+        include:
           # Count PHP 8.1 as experimental (CI failures allowed).
           - php-version: 8.1
             experimental: true
