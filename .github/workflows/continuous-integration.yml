@@ -22,6 +22,9 @@ jobs:
           - "^6"
           - "^7"
           - "^8"
+        composer-flags:
+          - ""
+          - "--prefer-lowest"
 
     steps:
       - name: "Checkout"
@@ -42,7 +45,7 @@ jobs:
           restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.laravel-version }}-"
 
       - name: "Install dependencies with composer"
-        run: "composer require illuminate/contracts:${{ matrix.laravel-version }} --no-interaction --prefer-dist --no-interaction"
+        run: "composer require illuminate/contracts:${{ matrix.laravel-version }} --no-interaction --prefer-dist ${{ matrix.composer-flags }}"
 
       - name: "Install dependencies with yarn"
         uses: borales/actions-yarn@v2.3.0
