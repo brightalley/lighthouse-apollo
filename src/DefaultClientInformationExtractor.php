@@ -14,11 +14,6 @@ class DefaultClientInformationExtractor implements ClientInformationExtractor
         $this->request = $request;
     }
 
-    public function getClientAddress(): ?string
-    {
-        return $this->request->getClientIp();
-    }
-
     public function getClientName(): ?string
     {
         return $this->request->headers->get(

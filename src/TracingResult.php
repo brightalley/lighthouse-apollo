@@ -94,9 +94,6 @@ class TracingResult
                 $this->tracing['startTime'],
             ),
         ];
-        if (!empty($this->client['address'])) {
-            $tracingData['client_address'] = $this->client['address'];
-        }
         if (!empty($this->client['name'])) {
             $tracingData['client_name'] = $this->client['name'];
         }

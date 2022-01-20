@@ -5,13 +5,6 @@ namespace BrightAlley\LighthouseApollo\Contracts;
 interface ClientInformationExtractor
 {
     /**
-     * Get the address of the client that made the current GraphQL request.
-     *
-     * @return string|null
-     */
-    public function getClientAddress(): ?string;
-
-    /**
      * Get the name of the client that made the current GraphQL request.
      *
      * @return string|null

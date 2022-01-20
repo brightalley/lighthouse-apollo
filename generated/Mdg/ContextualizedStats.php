@@ -22,7 +22,8 @@ class ContextualizedStats extends \Google\Protobuf\Internal\Message
      */
     protected $query_latency_stats = null;
     /**
-     * Key is type name.
+     * Key is type name. This structure provides data for the count and latency of individual
+     * field executions and thus only reflects operations for which field-level tracing occurred.
      *
      * Generated from protobuf field <code>map<string, .mdg.engine.proto.TypeStat> per_type_stat = 3;</code>
      */
@@ -37,7 +38,8 @@ class ContextualizedStats extends \Google\Protobuf\Internal\Message
      *     @type \Mdg\StatsContext $context
      *     @type \Mdg\QueryLatencyStats $query_latency_stats
      *     @type array|\Google\Protobuf\Internal\MapField $per_type_stat
-     *           Key is type name.
+     *           Key is type name. This structure provides data for the count and latency of individual
+     *           field executions and thus only reflects operations for which field-level tracing occurred.
      * }
      */
     public function __construct($data = NULL) {
@@ -110,7 +112,8 @@ class ContextualizedStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Key is type name.
+     * Key is type name. This structure provides data for the count and latency of individual
+     * field executions and thus only reflects operations for which field-level tracing occurred.
      *
      * Generated from protobuf field <code>map<string, .mdg.engine.proto.TypeStat> per_type_stat = 3;</code>
      * @return \Google\Protobuf\Internal\MapField
@@ -121,7 +124,8 @@ class ContextualizedStats extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Key is type name.
+     * Key is type name. This structure provides data for the count and latency of individual
+     * field executions and thus only reflects operations for which field-level tracing occurred.
      *
      * Generated from protobuf field <code>map<string, .mdg.engine.proto.TypeStat> per_type_stat = 3;</code>
      * @param array|\Google\Protobuf\Internal\MapField $var

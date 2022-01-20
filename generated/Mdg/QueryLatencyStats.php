@@ -61,6 +61,14 @@ class QueryLatencyStats extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>uint64 forbidden_operation_count = 12;</code>
      */
     protected $forbidden_operation_count = 0;
+    /**
+     * The number of requests that were executed without field-level
+     * instrumentation (and thus do not contribute to `observed_execution_count`
+     * fields on this message's cousin-twice-removed FieldStats).
+     *
+     * Generated from protobuf field <code>uint64 requests_without_field_instrumentation = 17;</code>
+     */
+    protected $requests_without_field_instrumentation = 0;
 
     /**
      * Constructor.
@@ -80,6 +88,10 @@ class QueryLatencyStats extends \Google\Protobuf\Internal\Message
      *     @type int[]|string[]|\Google\Protobuf\Internal\RepeatedField $private_cache_ttl_count
      *     @type int|string $registered_operation_count
      *     @type int|string $forbidden_operation_count
+     *     @type int|string $requests_without_field_instrumentation
+     *           The number of requests that were executed without field-level
+     *           instrumentation (and thus do not contribute to `observed_execution_count`
+     *           fields on this message's cousin-twice-removed FieldStats).
      * }
      */
     public function __construct($data = NULL) {
@@ -357,6 +369,36 @@ class QueryLatencyStats extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkUint64($var);
         $this->forbidden_operation_count = $var;
+
+        return $this;
+    }
+
+    /**
+     * The number of requests that were executed without field-level
+     * instrumentation (and thus do not contribute to `observed_execution_count`
+     * fields on this message's cousin-twice-removed FieldStats).
+     *
+     * Generated from protobuf field <code>uint64 requests_without_field_instrumentation = 17;</code>
+     * @return int|string
+     */
+    public function getRequestsWithoutFieldInstrumentation()
+    {
+        return $this->requests_without_field_instrumentation;
+    }
+
+    /**
+     * The number of requests that were executed without field-level
+     * instrumentation (and thus do not contribute to `observed_execution_count`
+     * fields on this message's cousin-twice-removed FieldStats).
+     *
+     * Generated from protobuf field <code>uint64 requests_without_field_instrumentation = 17;</code>
+     * @param int|string $var
+     * @return $this
+     */
+    public function setRequestsWithoutFieldInstrumentation($var)
+    {
+        GPBUtil::checkUint64($var);
+        $this->requests_without_field_instrumentation = $var;
 
         return $this;
     }

@@ -69,10 +69,9 @@ class TracingResultTest extends TestCase
     public function nullableClientFields(): array
     {
         return [
-            [['address' => null]],
             [['name' => null]],
             [['version' => null]],
-            [['address' => null, 'name' => null, 'version' => null]],
+            [['name' => null, 'version' => null]],
         ];
     }
 

@@ -20,19 +20,50 @@ class FieldStat extends \Google\Protobuf\Internal\Message
      */
     protected $return_type = '';
     /**
+     * Number of errors whose path is this field. Note that we assume that error
+     * tracking does *not* require field-level instrumentation so this *will*
+     * include errors from requests that don't contribute to the
+     * `observed_execution_count` field (and does not need to be scaled by
+     * field_execution_weight).
+     *
      * Generated from protobuf field <code>uint64 errors_count = 4;</code>
      */
     protected $errors_count = 0;
     /**
-     * Generated from protobuf field <code>uint64 count = 5;</code>
+     * Number of times that the resolver for this field is directly observed being
+     * executed.
+     *
+     * Generated from protobuf field <code>uint64 observed_execution_count = 5;</code>
      */
-    protected $count = 0;
+    protected $observed_execution_count = 0;
     /**
+     * Same as `count` but potentially scaled upwards if the server was only
+     * performing field-level instrumentation on a sampling of operations.  For
+     * example, if the server randomly instruments 1% of requests for this
+     * operation, this number will be 100 times greater than
+     * `observed_execution_count`. (When aggregating a Trace into FieldStats,
+     * this number goes up by the trace's `field_execution_weight` for each
+     * observed field execution, while `observed_execution_count` above goes
+     * up by 1.)
+     *
+     * Generated from protobuf field <code>uint64 estimated_execution_count = 10;</code>
+     */
+    protected $estimated_execution_count = 0;
+    /**
+     * Number of times the resolver for this field is executed that resulted in
+     * at least one error. "Request" is a misnomer here as this corresponds to
+     * resolver calls, not overall operations. Like `errors_count` above, this
+     * includes all requests rather than just requests with field-level
+     * instrumentation.
+     *
      * Generated from protobuf field <code>uint64 requests_with_errors_count = 6;</code>
      */
     protected $requests_with_errors_count = 0;
     /**
-     * Duration histogram; see docs/histograms.md
+     * Duration histogram for the latency of this field. Note that it is scaled in
+     * the same way as estimated_execution_count so its "total count" might be
+     * greater than `observed_execution_count` and may not exactly equal
+     * `estimated_execution_count` due to rounding.
      *
      * Generated from protobuf field <code>repeated sint64 latency_count = 9;</code>
      */
@@ -47,10 +78,34 @@ class FieldStat extends \Google\Protobuf\Internal\Message
      *     @type string $return_type
      *           required; eg "String!" for User.email:String!
      *     @type int|string $errors_count
-     *     @type int|string $count
+     *           Number of errors whose path is this field. Note that we assume that error
+     *           tracking does *not* require field-level instrumentation so this *will*
+     *           include errors from requests that don't contribute to the
+     *           `observed_execution_count` field (and does not need to be scaled by
+     *           field_execution_weight).
+     *     @type int|string $observed_execution_count
+     *           Number of times that the resolver for this field is directly observed being
+     *           executed.
+     *     @type int|string $estimated_execution_count
+     *           Same as `count` but potentially scaled upwards if the server was only
+     *           performing field-level instrumentation on a sampling of operations.  For
+     *           example, if the server randomly instruments 1% of requests for this
+     *           operation, this number will be 100 times greater than
+     *           `observed_execution_count`. (When aggregating a Trace into FieldStats,
+     *           this number goes up by the trace's `field_execution_weight` for each
+     *           observed field execution, while `observed_execution_count` above goes
+     *           up by 1.)
      *     @type int|string $requests_with_errors_count
+     *           Number of times the resolver for this field is executed that resulted in
+     *           at least one error. "Request" is a misnomer here as this corresponds to
+     *           resolver calls, not overall operations. Like `errors_count` above, this
+     *           includes all requests rather than just requests with field-level
+     *           instrumentation.
      *     @type int[]|string[]|\Google\Protobuf\Internal\RepeatedField $latency_count
-     *           Duration histogram; see docs/histograms.md
+     *           Duration histogram for the latency of this field. Note that it is scaled in
+     *           the same way as estimated_execution_count so its "total count" might be
+     *           greater than `observed_execution_count` and may not exactly equal
+     *           `estimated_execution_count` due to rounding.
      * }
      */
     public function __construct($data = NULL) {
@@ -85,6 +140,12 @@ class FieldStat extends \Google\Protobuf\Internal\Message
     }
 
     /**
+     * Number of errors whose path is this field. Note that we assume that error
+     * tracking does *not* require field-level instrumentation so this *will*
+     * include errors from requests that don't contribute to the
+     * `observed_execution_count` field (and does not need to be scaled by
+     * field_execution_weight).
+     *
      * Generated from protobuf field <code>uint64 errors_count = 4;</code>
      * @return int|string
      */
@@ -94,6 +155,12 @@ class FieldStat extends \Google\Protobuf\Internal\Message
     }
 
     /**
+     * Number of errors whose path is this field. Note that we assume that error
+     * tracking does *not* require field-level instrumentation so this *will*
+     * include errors from requests that don't contribute to the
+     * `observed_execution_count` field (and does not need to be scaled by
+     * field_execution_weight).
+     *
      * Generated from protobuf field <code>uint64 errors_count = 4;</code>
      * @param int|string $var
      * @return $this
@@ -107,28 +174,80 @@ class FieldStat extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Generated from protobuf field <code>uint64 count = 5;</code>
+     * Number of times that the resolver for this field is directly observed being
+     * executed.
+     *
+     * Generated from protobuf field <code>uint64 observed_execution_count = 5;</code>
      * @return int|string
      */
-    public function getCount()
+    public function getObservedExecutionCount()
     {
-        return $this->count;
+        return $this->observed_execution_count;
     }
 
     /**
-     * Generated from protobuf field <code>uint64 count = 5;</code>
+     * Number of times that the resolver for this field is directly observed being
+     * executed.
+     *
+     * Generated from protobuf field <code>uint64 observed_execution_count = 5;</code>
      * @param int|string $var
      * @return $this
      */
-    public function setCount($var)
+    public function setObservedExecutionCount($var)
     {
         GPBUtil::checkUint64($var);
-        $this->count = $var;
+        $this->observed_execution_count = $var;
 
         return $this;
     }
 
     /**
+     * Same as `count` but potentially scaled upwards if the server was only
+     * performing field-level instrumentation on a sampling of operations.  For
+     * example, if the server randomly instruments 1% of requests for this
+     * operation, this number will be 100 times greater than
+     * `observed_execution_count`. (When aggregating a Trace into FieldStats,
+     * this number goes up by the trace's `field_execution_weight` for each
+     * observed field execution, while `observed_execution_count` above goes
+     * up by 1.)
+     *
+     * Generated from protobuf field <code>uint64 estimated_execution_count = 10;</code>
+     * @return int|string
+     */
+    public function getEstimatedExecutionCount()
+    {
+        return $this->estimated_execution_count;
+    }
+
+    /**
+     * Same as `count` but potentially scaled upwards if the server was only
+     * performing field-level instrumentation on a sampling of operations.  For
+     * example, if the server randomly instruments 1% of requests for this
+     * operation, this number will be 100 times greater than
+     * `observed_execution_count`. (When aggregating a Trace into FieldStats,
+     * this number goes up by the trace's `field_execution_weight` for each
+     * observed field execution, while `observed_execution_count` above goes
+     * up by 1.)
+     *
+     * Generated from protobuf field <code>uint64 estimated_execution_count = 10;</code>
+     * @param int|string $var
+     * @return $this
+     */
+    public function setEstimatedExecutionCount($var)
+    {
+        GPBUtil::checkUint64($var);
+        $this->estimated_execution_count = $var;
+
+        return $this;
+    }
+
+    /**
+     * Number of times the resolver for this field is executed that resulted in
+     * at least one error. "Request" is a misnomer here as this corresponds to
+     * resolver calls, not overall operations. Like `errors_count` above, this
+     * includes all requests rather than just requests with field-level
+     * instrumentation.
+     *
      * Generated from protobuf field <code>uint64 requests_with_errors_count = 6;</code>
      * @return int|string
      */
@@ -138,6 +257,12 @@ class FieldStat extends \Google\Protobuf\Internal\Message
     }
 
     /**
+     * Number of times the resolver for this field is executed that resulted in
+     * at least one error. "Request" is a misnomer here as this corresponds to
+     * resolver calls, not overall operations. Like `errors_count` above, this
+     * includes all requests rather than just requests with field-level
+     * instrumentation.
+     *
      * Generated from protobuf field <code>uint64 requests_with_errors_count = 6;</code>
      * @param int|string $var
      * @return $this
@@ -151,7 +276,10 @@ class FieldStat extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Duration histogram; see docs/histograms.md
+     * Duration histogram for the latency of this field. Note that it is scaled in
+     * the same way as estimated_execution_count so its "total count" might be
+     * greater than `observed_execution_count` and may not exactly equal
+     * `estimated_execution_count` due to rounding.
      *
      * Generated from protobuf field <code>repeated sint64 latency_count = 9;</code>
      * @return \Google\Protobuf\Internal\RepeatedField
@@ -162,7 +290,10 @@ class FieldStat extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Duration histogram; see docs/histograms.md
+     * Duration histogram for the latency of this field. Note that it is scaled in
+     * the same way as estimated_execution_count so its "total count" might be
+     * greater than `observed_execution_count` and may not exactly equal
+     * `estimated_execution_count` due to rounding.
      *
      * Generated from protobuf field <code>repeated sint64 latency_count = 9;</code>
      * @param int[]|string[]|\Google\Protobuf\Internal\RepeatedField $var

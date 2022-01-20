@@ -9,7 +9,8 @@ use Google\Protobuf\Internal\RepeatedField;
 use Google\Protobuf\Internal\GPBUtil;
 
 /**
- * A sequence of traces and stats. An individual trace should either be counted as a stat or trace
+ * A sequence of traces and stats. An individual operation should either be described as a trace
+ * or as part of stats, but not both.
  *
  * Generated from protobuf message <code>mdg.engine.proto.TracesAndStats</code>
  */
@@ -23,6 +24,17 @@ class TracesAndStats extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>repeated .mdg.engine.proto.ContextualizedStats stats_with_context = 2;</code>
      */
     private $stats_with_context;
+    /**
+     * This describes the fields referenced in the operation. Note that this may
+     * include fields that don't show up in FieldStats (due to being interface fields,
+     * being nested under null fields or empty lists or non-matching fragments or
+     * `&#64;include` or `&#64;skip`, etc). It also may be missing fields that show up in FieldStats
+     * (as FieldStats will include the concrete object type for fields referenced
+     * via an interface type).
+     *
+     * Generated from protobuf field <code>map<string, .mdg.engine.proto.ReferencedFieldsForType> referenced_fields_by_type = 4;</code>
+     */
+    private $referenced_fields_by_type;
     /**
      * This field is used to validate that the algorithm used to construct `stats_with_context`
      * matches similar algorithms in Apollo's servers. It is otherwise ignored and should not
@@ -40,6 +52,13 @@ class TracesAndStats extends \Google\Protobuf\Internal\Message
      *
      *     @type \Mdg\Trace[]|\Google\Protobuf\Internal\RepeatedField $trace
      *     @type \Mdg\ContextualizedStats[]|\Google\Protobuf\Internal\RepeatedField $stats_with_context
+     *     @type array|\Google\Protobuf\Internal\MapField $referenced_fields_by_type
+     *           This describes the fields referenced in the operation. Note that this may
+     *           include fields that don't show up in FieldStats (due to being interface fields,
+     *           being nested under null fields or empty lists or non-matching fragments or
+     *           `&#64;include` or `&#64;skip`, etc). It also may be missing fields that show up in FieldStats
+     *           (as FieldStats will include the concrete object type for fields referenced
+     *           via an interface type).
      *     @type \Mdg\Trace[]|\Google\Protobuf\Internal\RepeatedField $internal_traces_contributing_to_stats
      *           This field is used to validate that the algorithm used to construct `stats_with_context`
      *           matches similar algorithms in Apollo's servers. It is otherwise ignored and should not
@@ -91,6 +110,42 @@ class TracesAndStats extends \Google\Protobuf\Internal\Message
     {
         $arr = GPBUtil::checkRepeatedField($var, \Google\Protobuf\Internal\GPBType::MESSAGE, \Mdg\ContextualizedStats::class);
         $this->stats_with_context = $arr;
+
+        return $this;
+    }
+
+    /**
+     * This describes the fields referenced in the operation. Note that this may
+     * include fields that don't show up in FieldStats (due to being interface fields,
+     * being nested under null fields or empty lists or non-matching fragments or
+     * `&#64;include` or `&#64;skip`, etc). It also may be missing fields that show up in FieldStats
+     * (as FieldStats will include the concrete object type for fields referenced
+     * via an interface type).
+     *
+     * Generated from protobuf field <code>map<string, .mdg.engine.proto.ReferencedFieldsForType> referenced_fields_by_type = 4;</code>
+     * @return \Google\Protobuf\Internal\MapField
+     */
+    public function getReferencedFieldsByType()
+    {
+        return $this->referenced_fields_by_type;
+    }
+
+    /**
+     * This describes the fields referenced in the operation. Note that this may
+     * include fields that don't show up in FieldStats (due to being interface fields,
+     * being nested under null fields or empty lists or non-matching fragments or
+     * `&#64;include` or `&#64;skip`, etc). It also may be missing fields that show up in FieldStats
+     * (as FieldStats will include the concrete object type for fields referenced
+     * via an interface type).
+     *
+     * Generated from protobuf field <code>map<string, .mdg.engine.proto.ReferencedFieldsForType> referenced_fields_by_type = 4;</code>
+     * @param array|\Google\Protobuf\Internal\MapField $var
+     * @return $this
+     */
+    public function setReferencedFieldsByType($var)
+    {
+        $arr = GPBUtil::checkMapField($var, \Google\Protobuf\Internal\GPBType::STRING, \Google\Protobuf\Internal\GPBType::MESSAGE, \Mdg\ReferencedFieldsForType::class);
+        $this->referenced_fields_by_type = $arr;
 
         return $this;
     }

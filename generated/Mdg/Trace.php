@@ -71,9 +71,6 @@ class Trace extends \Google\Protobuf\Internal\Message
      */
     protected $details = null;
     /**
-     * Note: engineproxy always sets client_name, client_version, and client_address to "none".
-     * apollo-engine-reporting allows for them to be set by the user.
-     *
      * Generated from protobuf field <code>string client_name = 7;</code>
      */
     protected $client_name = '';
@@ -81,10 +78,6 @@ class Trace extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>string client_version = 8;</code>
      */
     protected $client_version = '';
-    /**
-     * Generated from protobuf field <code>string client_address = 9;</code>
-     */
-    protected $client_address = '';
     /**
      * Generated from protobuf field <code>.mdg.engine.proto.Trace.HTTP http = 10;</code>
      */
@@ -135,6 +128,17 @@ class Trace extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>bool forbidden_operation = 25;</code>
      */
     protected $forbidden_operation = false;
+    /**
+     * Some servers don't do field-level instrumentation for every request and assign
+     * each request a "weight" for each request that they do instrument. When this
+     * trace is aggregated into field usage stats, it should count as this value
+     * towards the estimated_execution_count rather than just 1. This value should
+     * typically be at least 1.
+     * 0 is treated as 1 for backwards compatibility.
+     *
+     * Generated from protobuf field <code>double field_execution_weight = 31;</code>
+     */
+    protected $field_execution_weight = 0.0;
 
     /**
      * Constructor.
@@ -170,10 +174,7 @@ class Trace extends \Google\Protobuf\Internal\Message
      *     @type string $unexecutedOperationName
      *     @type \Mdg\Trace\Details $details
      *     @type string $client_name
-     *           Note: engineproxy always sets client_name, client_version, and client_address to "none".
-     *           apollo-engine-reporting allows for them to be set by the user.
      *     @type string $client_version
-     *     @type string $client_address
      *     @type \Mdg\Trace\HTTP $http
      *     @type \Mdg\Trace\CachePolicy $cache_policy
      *     @type \Mdg\Trace\QueryPlanNode $query_plan
@@ -194,6 +195,13 @@ class Trace extends \Google\Protobuf\Internal\Message
      *           Was this operation registered and a part of the safelist?
      *     @type bool $forbidden_operation
      *           Was this operation forbidden due to lack of safelisting?
+     *     @type float $field_execution_weight
+     *           Some servers don't do field-level instrumentation for every request and assign
+     *           each request a "weight" for each request that they do instrument. When this
+     *           trace is aggregated into field usage stats, it should count as this value
+     *           towards the estimated_execution_count rather than just 1. This value should
+     *           typically be at least 1.
+     *           0 is treated as 1 for backwards compatibility.
      * }
      */
     public function __construct($data = NULL) {
@@ -468,9 +476,6 @@ class Trace extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Note: engineproxy always sets client_name, client_version, and client_address to "none".
-     * apollo-engine-reporting allows for them to be set by the user.
-     *
      * Generated from protobuf field <code>string client_name = 7;</code>
      * @return string
      */
@@ -480,9 +485,6 @@ class Trace extends \Google\Protobuf\Internal\Message
     }
 
     /**
-     * Note: engineproxy always sets client_name, client_version, and client_address to "none".
-     * apollo-engine-reporting allows for them to be set by the user.
-     *
      * Generated from protobuf field <code>string client_name = 7;</code>
      * @param string $var
      * @return $this
@@ -513,28 +515,6 @@ class Trace extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkString($var, True);
         $this->client_version = $var;
-
-        return $this;
-    }
-
-    /**
-     * Generated from protobuf field <code>string client_address = 9;</code>
-     * @return string
-     */
-    public function getClientAddress()
-    {
-        return $this->client_address;
-    }
-
-    /**
-     * Generated from protobuf field <code>string client_address = 9;</code>
-     * @param string $var
-     * @return $this
-     */
-    public function setClientAddress($var)
-    {
-        GPBUtil::checkString($var, True);
-        $this->client_address = $var;
 
         return $this;
     }
@@ -777,6 +757,42 @@ class Trace extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkBool($var);
         $this->forbidden_operation = $var;
+
+        return $this;
+    }
+
+    /**
+     * Some servers don't do field-level instrumentation for every request and assign
+     * each request a "weight" for each request that they do instrument. When this
+     * trace is aggregated into field usage stats, it should count as this value
+     * towards the estimated_execution_count rather than just 1. This value should
+     * typically be at least 1.
+     * 0 is treated as 1 for backwards compatibility.
+     *
+     * Generated from protobuf field <code>double field_execution_weight = 31;</code>
+     * @return float
+     */
+    public function getFieldExecutionWeight()
+    {
+        return $this->field_execution_weight;
+    }
+
+    /**
+     * Some servers don't do field-level instrumentation for every request and assign
+     * each request a "weight" for each request that they do instrument. When this
+     * trace is aggregated into field usage stats, it should count as this value
+     * towards the estimated_execution_count rather than just 1. This value should
+     * typically be at least 1.
+     * 0 is treated as 1 for backwards compatibility.
+     *
+     * Generated from protobuf field <code>double field_execution_weight = 31;</code>
+     * @param float $var
+     * @return $this
+     */
+    public function setFieldExecutionWeight($var)
+    {
+        GPBUtil::checkDouble($var);
+        $this->field_execution_weight = $var;
 
         return $this;
     }
