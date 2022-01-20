@@ -18,6 +18,7 @@ jobs:
         php-version:
           - "7.4"
           - "8.0"
+          - "8.1"
         laravel-version:
           - "^6"
           - "^7"
@@ -25,6 +26,16 @@ jobs:
         composer-flags:
           - ""
           - "--prefer-lowest"
+        exclude:
+          # Laravel 6.x doesn't support PHP 8.1.
+          - php-version: 8.1
+            laravel-version: ^6
+          # Older dev-tools don't properly support PHP 8.1.
+          - php-version: 8.1
+            composer-flags: --prefer-lowest
+          # Count PHP 8.1 as experimental (CI failures allowed).
+          - php-version: 8.1
+            experimental: true
 
     steps:
       - name: "Checkout"
@@ -58,7 +69,7 @@ jobs:
           cmd: "prettier --check src tests"
 
       - name: "Run psalm"
-        run: "vendor/bin/psalm"
+        run: "vendor/bin/psalm --php-version=${{ matrix.php-version }}"
 
       - name: "Run phpunit"
         run: "vendor/bin/phpunit"
