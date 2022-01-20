@@ -157,13 +157,12 @@ class TracingResult
                     // will end up being one node higher than the direct parent.
                     /** @var array<string,string> $missingNodes */
                     $missingNodes = [];
-                    /** @var Trace\Node $addNodesTo */
                     $addNodesTo = $result->getRoot();
                     for (
                         $i =
                             count($trace['path']) -
                             (is_numeric($directParent) ? 2 : 1);
-                        $i > 1;
+                        $i > ($addNodesTo === null ? 0 : 1);
                         --$i
                     ) {
                         $partialPath = implode(
@@ -192,7 +191,11 @@ class TracingResult
                         $nodeToInsert = new Trace\Node([
                             'response_name' => $missingNode,
                         ]);
-                        $addNodesTo->getChild()[] = $nodeToInsert;
+                        if ($addNodesTo === null) {
+                            $result->setRoot($nodeToInsert);
+                        } else {
+                            $addNodesTo->getChild()[] = $nodeToInsert;
+                        }
 
                         $pathTargets[$path] = $nodeToInsert;
                         $addNodesTo = $nodeToInsert;
