@@ -23,10 +23,14 @@ jobs:
           - "^6"
           - "^7"
           - "^8"
+          - "^9"
         composer-flags:
           - ""
           - "--prefer-lowest"
         exclude:
+          # Laravel 9.x doesn't support PHP 7.4.
+          - php-version: 7.4
+            laravel-version: ^9
           # Laravel 6.x doesn't support PHP 8.1.
           - php-version: 8.1
             laravel-version: ^6
