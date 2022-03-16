@@ -2,18 +2,18 @@
 
 namespace BrightAlley\LighthouseApollo\Commands;
 
-use BrightAlley\LighthouseApollo\Exceptions\ConfigurationException;
 use BrightAlley\LighthouseApollo\Exceptions\RegisterSchemaFailedException;
 use BrightAlley\LighthouseApollo\Exceptions\RegisterSchemaRequestFailedException;
 use BrightAlley\LighthouseApollo\Graph\GitContextInput;
 use BrightAlley\LighthouseApollo\Graph\UploadSchemaVariables;
 use Cz\Git\GitException;
 use Cz\Git\GitRepository;
+use GraphQL\Utils\SchemaPrinter;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Contracts\Foundation\Application;
 use JsonException;
-use Nuwave\Lighthouse\Schema\Source\SchemaSourceProvider;
+use Nuwave\Lighthouse\Schema\SchemaBuilder;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor
@@ -55,8 +55,6 @@ class RegisterSchema extends Command
 
     private Config $config;
 
-    private SchemaSourceProvider $schemaSourceProvider;
-
     private Application $app;
 
     /**
@@ -64,33 +62,27 @@ class RegisterSchema extends Command
      *
      * @param Application $app
      * @param Config $config
-     * @param SchemaSourceProvider $schemaSourceProvider
      */
-    public function __construct(
-        Application $app,
-        Config $config,
-        SchemaSourceProvider $schemaSourceProvider
-    ) {
+    public function __construct(Application $app, Config $config)
+    {
         parent::__construct();
 
         $this->app = $app;
         $this->config = $config;
-        $this->schemaSourceProvider = $schemaSourceProvider;
     }
 
     /**
      * Execute the console command.
      *
-     * @throws ConfigurationException
      * @throws JsonException
      * @throws RegisterSchemaFailedException
      * @throws RegisterSchemaRequestFailedException
      */
-    public function handle(): void
+    public function handle(SchemaBuilder $schemaBuilder): void
     {
         $variables = new UploadSchemaVariables(
             $this->config->get('lighthouse-apollo.apollo_graph_id'),
-            $this->schemaSourceProvider->getSchemaString(),
+            SchemaPrinter::doPrint($schemaBuilder->schema()),
             $this->config->get('lighthouse-apollo.apollo_graph_variant'),
             $this->getGitContext(),
         );
