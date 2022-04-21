@@ -47,6 +47,12 @@ class Report extends \Google\Protobuf\Internal\Message
      * Generated from protobuf field <code>.google.protobuf.Timestamp end_time = 2;</code>
      */
     protected $end_time = null;
+    /**
+     * Total number of operations processed during this period.
+     *
+     * Generated from protobuf field <code>uint64 operation_count = 6;</code>
+     */
+    protected $operation_count = 0;
 
     /**
      * Constructor.
@@ -68,6 +74,8 @@ class Report extends \Google\Protobuf\Internal\Message
      *           If this field is not present the max of the end_time of each trace will be used instead.
      *           If there are no traces and no end_time present the report will not be able to be processed.
      *           Note: This will override the end_time from traces.
+     *     @type int|string $operation_count
+     *           Total number of operations processed during this period.
      * }
      */
     public function __construct($data = NULL) {
@@ -183,6 +191,32 @@ class Report extends \Google\Protobuf\Internal\Message
     {
         GPBUtil::checkMessage($var, \Google\Protobuf\Timestamp::class);
         $this->end_time = $var;
+
+        return $this;
+    }
+
+    /**
+     * Total number of operations processed during this period.
+     *
+     * Generated from protobuf field <code>uint64 operation_count = 6;</code>
+     * @return int|string
+     */
+    public function getOperationCount()
+    {
+        return $this->operation_count;
+    }
+
+    /**
+     * Total number of operations processed during this period.
+     *
+     * Generated from protobuf field <code>uint64 operation_count = 6;</code>
+     * @param int|string $var
+     * @return $this
+     */
+    public function setOperationCount($var)
+    {
+        GPBUtil::checkUint64($var);
+        $this->operation_count = $var;
 
         return $this;
     }

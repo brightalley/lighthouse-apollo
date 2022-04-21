@@ -135,6 +135,7 @@ class SendTracingToApollo
                 'uname' => php_uname(),
             ]),
             'traces_per_query' => $tracesPerQuery,
+            'operation_count' => count($this->tracing),
         ]);
     }
 

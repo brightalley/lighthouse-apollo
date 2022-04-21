@@ -324,7 +324,7 @@ class Node extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>repeated .mdg.engine.proto.Trace.Node child = 12;</code>
-     * @return \Google\Protobuf\Internal\RepeatedField<Node>
+     * @return \Google\Protobuf\Internal\RepeatedField
      */
     public function getChild()
     {
