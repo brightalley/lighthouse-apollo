@@ -24,14 +24,14 @@ use ReflectionClass;
 class SendTracingToApollo
 {
     /**
-     * @var array<int,TracingResult>
+     * @var array<int, TracingResult>
      */
     private array $tracing;
 
     private Config $config;
 
     /**
-     * @var array<string,MessageGetter[]>
+     * @var array<string, MessageGetter[]>
      */
     private array $messagePropertyGetters = [];
 
@@ -39,7 +39,7 @@ class SendTracingToApollo
      * Constructor.
      *
      * @param Config $config
-     * @param array<int,TracingResult> $tracing
+     * @param array<int, TracingResult> $tracing
      */
     public function __construct(Config $config, array $tracing)
     {
@@ -335,7 +335,7 @@ class SendTracingToApollo
             // Special-case this "oneof" property.
             if ($value instanceof Node && $propertyName === 'id') {
                 $result[] = function (Message $node): array {
-                    if (!($node instanceof Node)) {
+                    if (!($node instanceof Node) || $node->getId() === '') {
                         return ['', null];
                     }
 

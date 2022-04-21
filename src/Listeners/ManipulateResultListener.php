@@ -7,6 +7,7 @@ use BrightAlley\LighthouseApollo\Connectors\RedisConnector;
 use BrightAlley\LighthouseApollo\Contracts\ClientInformationExtractor;
 use BrightAlley\LighthouseApollo\Exceptions\InvalidTracingSendMode;
 use BrightAlley\LighthouseApollo\QueryRequestStack;
+use BrightAlley\LighthouseApollo\Tracing\TraceTreeBuilder;
 use BrightAlley\LighthouseApollo\TracingResult;
 use Exception;
 use GraphQL\Error\DebugFlag;
@@ -23,6 +24,11 @@ use Mdg\Trace\HTTP\Method;
 use Nuwave\Lighthouse\Events\ManipulateResult;
 use Nuwave\Lighthouse\Events\StartExecution;
 
+/**
+ * @psalm-import-type TracingClient from TraceTreeBuilder
+ * @psalm-import-type TracingError from TraceTreeBuilder
+ * @psalm-import-type TracingHttp from TraceTreeBuilder
+ */
 class ManipulateResultListener
 {
     public const DEBUG_FLAGS =
@@ -82,10 +88,7 @@ class ManipulateResultListener
             return;
         }
 
-        if (
-            !isset($event->result->extensions['tracing']) &&
-            !count($event->result->errors)
-        ) {
+        if (!isset($event->result->extensions['tracing'])) {
             return;
         }
 
@@ -95,8 +98,8 @@ class ManipulateResultListener
             $currentQuery->operationName,
             $this->extractClientInformation(),
             $this->extractHttpInformation(),
-            $event->result->extensions['tracing'] ?? [],
-            array_map(function (Error $error) {
+            $event->result->extensions['tracing'],
+            array_map(static function (Error $error) {
                 return FormattedError::createFromException(
                     $error,
                     self::DEBUG_FLAGS,
@@ -106,7 +109,7 @@ class ManipulateResultListener
 
         $this->removeTracingFromExtensionsIfNeeded($event);
 
-        $tracingSendMode = $this->config->get(
+        $tracingSendMode = (string) $this->config->get(
             'lighthouse-apollo.send_tracing_mode',
         );
         switch ($tracingSendMode) {
@@ -138,7 +141,7 @@ class ManipulateResultListener
     }
 
     /**
-     * @return array{name: ?string, version: ?string}
+     * @psalm-return TracingClient
      */
     private function extractClientInformation(): array
     {
@@ -148,26 +151,24 @@ class ManipulateResultListener
         ];
     }
 
+    /**
+     * @psalm-return TracingHttp
+     */
     private function extractHttpInformation(): array
     {
         // These keys should correspond with Protobuf's HTTP object.
         /** {@see \Mdg\Trace\HTTP} */
         return array_merge(
             [
-                'method' => Method::value($this->request->method()),
+                'method' => (int) Method::value($this->request->method()),
                 'host' => $this->request->getHost(),
                 'path' => $this->request->path(),
                 'secure' => $this->request->secure(),
-                'protocol' => $this->request->getProtocolVersion(),
+                'protocol' => $this->request->getProtocolVersion() ?? 'unknown',
             ],
             $this->config->get('lighthouse-apollo.include_request_headers')
                 ? [
-                    'request_headers' => Arr::except(
-                        $this->request->headers->all(),
-                        $this->config->get(
-                            'lighthouse-apollo.excluded_request_headers',
-                        ),
-                    ),
+                    'request_headers' => $this->getRequestHeaders(),
                 ]
                 : [],
         );
@@ -202,6 +203,11 @@ class ManipulateResultListener
         $except = $this->config->get(
             'lighthouse-apollo.variables_except_names',
         );
+
+        /**
+         * @var string|int $key
+         * @var mixed $value
+         */
         foreach ($execution->variables ?? [] as $key => $value) {
             if (
                 (count($only) > 0 && !in_array($key, $only, true)) ||
@@ -223,5 +229,16 @@ class ManipulateResultListener
         }
 
         return $variables;
+    }
+
+    /**
+     * @return array<string, (string|null)[]>
+     */
+    private function getRequestHeaders(): array
+    {
+        return Arr::except(
+            $this->request->headers->all(),
+            $this->config->get('lighthouse-apollo.excluded_request_headers'),
+        );
     }
 }
