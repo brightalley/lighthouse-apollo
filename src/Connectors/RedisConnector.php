@@ -3,6 +3,54 @@
 namespace BrightAlley\LighthouseApollo\Connectors;
 
 use BrightAlley\LighthouseApollo\TracingResult;
+use GraphQL\Language\AST\DirectiveDefinitionNode;
+use GraphQL\Language\AST\EnumTypeDefinitionNode;
+use GraphQL\Language\AST\EnumTypeExtensionNode;
+use GraphQL\Language\AST\ExecutableDefinitionNode;
+use GraphQL\Language\AST\FieldDefinitionNode;
+use GraphQL\Language\AST\InputObjectTypeDefinitionNode;
+use GraphQL\Language\AST\InputObjectTypeExtensionNode;
+use GraphQL\Language\AST\InputValueDefinitionNode;
+use GraphQL\Language\AST\InterfaceTypeDefinitionNode;
+use GraphQL\Language\AST\InterfaceTypeExtensionNode;
+use GraphQL\Language\AST\Location;
+use GraphQL\Language\AST\NamedTypeNode;
+use GraphQL\Language\AST\NameNode;
+use GraphQL\Language\AST\DocumentNode;
+use GraphQL\Language\AST\NodeList;
+use GraphQL\Language\AST\ObjectTypeDefinitionNode;
+use GraphQL\Language\AST\ObjectTypeExtensionNode;
+use GraphQL\Language\AST\OperationDefinitionNode;
+use GraphQL\Language\AST\ScalarTypeDefinitionNode;
+use GraphQL\Language\AST\ScalarTypeExtensionNode;
+use GraphQL\Language\AST\SchemaDefinitionNode;
+use GraphQL\Language\AST\SchemaTypeExtensionNode;
+use GraphQL\Language\AST\TypeDefinitionNode;
+use GraphQL\Language\AST\UnionTypeDefinitionNode;
+use GraphQL\Language\AST\UnionTypeExtensionNode;
+use GraphQL\Language\AST\VariableDefinitionNode;
+use GraphQL\Language\AST\VariableNode;
+use GraphQL\Language\AST\SelectionSetNode;
+use GraphQL\Language\AST\FieldNode;
+use GraphQL\Language\AST\ArgumentNode;
+use GraphQL\Language\AST\FragmentSpreadNode;
+use GraphQL\Language\AST\InlineFragmentNode;
+use GraphQL\Language\AST\FragmentDefinitionNode;
+use GraphQL\Language\AST\IntValueNode;
+use GraphQL\Language\AST\FloatValueNode;
+use GraphQL\Language\AST\StringValueNode;
+use GraphQL\Language\AST\BooleanValueNode;
+use GraphQL\Language\AST\EnumValueNode;
+use GraphQL\Language\AST\ListValueNode;
+use GraphQL\Language\AST\ObjectValueNode;
+use GraphQL\Language\AST\ObjectFieldNode;
+use GraphQL\Language\AST\DirectiveNode;
+use GraphQL\Language\AST\ListTypeNode;
+use GraphQL\Language\AST\NonNullTypeNode;
+use GraphQL\Language\Source;
+use GraphQL\Language\SourceLocation;
+use GraphQL\Language\Token;
+use GraphQL\Type\Definition\EnumValueDefinition;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Redis\Factory as RedisFactory;
 use Illuminate\Redis\Connections\Connection as RedisConnection;
@@ -135,7 +183,61 @@ class RedisConnector
             static fn(
                 string $serializedTracingResult
             ): TracingResult => unserialize($serializedTracingResult, [
-                'allowed_classes' => [TracingResult::class],
+                'allowed_classes' => [
+                    // Only allow decoding tracing results.
+                    TracingResult::class,
+
+                    // And all possible nodes you may find in the GraphQL document.
+                    ArgumentNode::class,
+                    BooleanValueNode::class,
+                    DirectiveNode::class,
+                    DocumentNode::class,
+                    EnumValueNode::class,
+                    FieldNode::class,
+                    FloatValueNode::class,
+                    FragmentDefinitionNode::class,
+                    FragmentSpreadNode::class,
+                    InlineFragmentNode::class,
+                    IntValueNode::class,
+                    ListTypeNode::class,
+                    ListValueNode::class,
+                    Location::class,
+                    NamedTypeNode::class,
+                    NameNode::class,
+                    NodeList::class,
+                    NonNullTypeNode::class,
+                    ObjectFieldNode::class,
+                    ObjectValueNode::class,
+                    OperationDefinitionNode::class,
+                    SelectionSetNode::class,
+                    SourceLocation::class,
+                    StringValueNode::class,
+                    Source::class,
+                    Token::class,
+                    VariableDefinitionNode::class,
+                    VariableNode::class,
+
+                    // XXX: It seems... kind of unlikely that these would show up in a tracing document,
+                    // but maybe they could? Should figure that out at some point.
+                    DirectiveDefinitionNode::class,
+                    EnumTypeDefinitionNode::class,
+                    EnumTypeExtensionNode::class,
+                    EnumValueDefinition::class,
+                    FieldDefinitionNode::class,
+                    InputObjectTypeDefinitionNode::class,
+                    InputObjectTypeExtensionNode::class,
+                    InputValueDefinitionNode::class,
+                    InterfaceTypeDefinitionNode::class,
+                    InterfaceTypeExtensionNode::class,
+                    ObjectTypeDefinitionNode::class,
+                    ObjectTypeExtensionNode::class,
+                    ScalarTypeDefinitionNode::class,
+                    ScalarTypeExtensionNode::class,
+                    SchemaDefinitionNode::class,
+                    SchemaTypeExtensionNode::class,
+                    UnionTypeDefinitionNode::class,
+                    UnionTypeExtensionNode::class,
+                ],
             ]),
             $result,
         );

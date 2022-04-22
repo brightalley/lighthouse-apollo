@@ -14,6 +14,7 @@ use GraphQL\Error\DebugFlag;
 use GraphQL\Error\Error;
 use GraphQL\Error\FormattedError;
 use GraphQL\Language\Printer;
+use GraphQL\Type\Schema;
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
@@ -23,6 +24,7 @@ use LogicException;
 use Mdg\Trace\HTTP\Method;
 use Nuwave\Lighthouse\Events\ManipulateResult;
 use Nuwave\Lighthouse\Events\StartExecution;
+use Nuwave\Lighthouse\Schema\SchemaBuilder;
 
 /**
  * @psalm-import-type TracingClient from TraceTreeBuilder
@@ -44,6 +46,8 @@ class ManipulateResultListener
 
     private QueryRequestStack $requestStack;
 
+    private SchemaBuilder $schemaBuilder;
+
     /**
      * Constructor.
      *
@@ -58,13 +62,15 @@ class ManipulateResultListener
         Config $config,
         Container $container,
         QueryRequestStack $requestStack,
-        Request $request
+        Request $request,
+        SchemaBuilder $schemaBuilder
     ) {
         $this->clientInformationExtractor = $clientInformationExtractor;
         $this->config = $config;
         $this->container = $container;
         $this->requestStack = $requestStack;
         $this->request = $request;
+        $this->schemaBuilder = $schemaBuilder;
     }
 
     /**
@@ -93,6 +99,7 @@ class ManipulateResultListener
         }
 
         $trace = new TracingResult(
+            $currentQuery->query,
             $queryText,
             $this->variables($currentQuery),
             $currentQuery->operationName,
@@ -115,7 +122,9 @@ class ManipulateResultListener
         switch ($tracingSendMode) {
             case 'sync':
                 try {
-                    (new SendTracingToApollo($this->config, [$trace]))->send();
+                    (new SendTracingToApollo($this->config, [$trace]))->send(
+                        $this->schemaBuilder,
+                    );
                 } catch (Exception $e) {
                     // We should probably not cause pain for the end users. Just include this in the extensions instead.
                     $event->result->errors[] = new Error(

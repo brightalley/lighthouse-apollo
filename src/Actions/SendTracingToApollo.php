@@ -4,11 +4,13 @@ namespace BrightAlley\LighthouseApollo\Actions;
 
 use BrightAlley\LighthouseApollo\Exceptions\SendTracingRequestFailedException;
 use BrightAlley\LighthouseApollo\Exceptions\SendTracingRequestInvalidResponseCode;
+use BrightAlley\LighthouseApollo\Tracing\ReferencedFields;
 use BrightAlley\LighthouseApollo\TracingResult;
 use Exception;
 use Google\Protobuf\Internal\MapField;
 use Google\Protobuf\Internal\Message;
 use Google\Protobuf\Internal\RepeatedField;
+use GraphQL\Type\Schema;
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Support\Str;
 use LogicException;
@@ -16,6 +18,7 @@ use Mdg\Report;
 use Mdg\ReportHeader;
 use Mdg\Trace\Node;
 use Mdg\TracesAndStats;
+use Nuwave\Lighthouse\Schema\SchemaBuilder;
 use ReflectionClass;
 
 /**
@@ -54,9 +57,10 @@ class SendTracingToApollo
      * @throws SendTracingRequestInvalidResponseCode
      * @throws SendTracingRequestFailedException
      */
-    public function send(): void
+    public function send(SchemaBuilder $schemaBuilder): void
     {
         // Convert tracings to map of query signature => traces.
+        /** @var array<string, TracesAndStats> $tracesPerQuery */
         $tracesPerQuery = [];
         foreach ($this->tracing as $trace) {
             $querySignature = $this->normalizeQuery(
@@ -64,20 +68,19 @@ class SendTracingToApollo
                 $trace->operationName,
             );
             if (!isset($tracesPerQuery[$querySignature])) {
-                $tracesPerQuery[$querySignature] = [];
+                $tracesPerQuery[$querySignature] = new TracesAndStats([
+                    'referenced_fields_by_type' => ReferencedFields::calculateReferencedFieldsByType(
+                        $trace->document,
+                        $schemaBuilder->schema(),
+                        $trace->operationName,
+                    ),
+                ]);
             }
 
-            $tracesPerQuery[$querySignature][] = $trace->getTracingAsProtobuf();
+            $tracesPerQuery[
+                $querySignature
+            ]->getTrace()[] = $trace->getTracingAsProtobuf();
         }
-
-        $tracesPerQuery = array_map(static function (
-            array $tracesAndStats
-        ): TracesAndStats {
-            return new TracesAndStats([
-                'trace' => $tracesAndStats,
-            ]);
-        },
-        $tracesPerQuery);
 
         $body = $this->getReportWithTraces($tracesPerQuery);
         $options = [

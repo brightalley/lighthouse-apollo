@@ -4,6 +4,8 @@ namespace BrightAlley\LighthouseApollo;
 
 use BrightAlley\LighthouseApollo\Tracing\TraceTreeBuilder;
 use Exception;
+use GraphQL\Language\AST\DocumentNode;
+use GraphQL\Language\Parser;
 use Mdg\Trace;
 
 /**
@@ -15,6 +17,8 @@ use Mdg\Trace;
 class TracingResult
 {
     public string $queryText;
+
+    public DocumentNode $document;
 
     public ?array $variables;
 
@@ -49,6 +53,7 @@ class TracingResult
      * @psalm-param TracingError[] $errors
      */
     public function __construct(
+        DocumentNode $document,
         string $queryText,
         ?array $variables,
         ?string $operationName,
@@ -57,6 +62,7 @@ class TracingResult
         array $tracing,
         array $errors
     ) {
+        $this->document = $document;
         $this->queryText = $queryText;
         $this->variables = $variables;
         $this->operationName = $operationName;
@@ -84,5 +90,13 @@ class TracingResult
         }
 
         return $treeBuilder->trace;
+    }
+
+    public function __wakeup(): void
+    {
+        /** @psalm-suppress RedundantPropertyInitializationCheck Handle serialized older versions of this class. */
+        if (!isset($this->document)) {
+            $this->document = Parser::parse($this->queryText);
+        }
     }
 }

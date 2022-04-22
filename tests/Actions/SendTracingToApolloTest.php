@@ -5,6 +5,7 @@ namespace BrightAlley\Tests\Actions;
 use BrightAlley\LighthouseApollo\Actions\SendTracingToApollo;
 use BrightAlley\LighthouseApollo\TracingResult;
 use BrightAlley\Tests\Support\UsesSampleData;
+use GraphQL\Language\Parser;
 use Illuminate\Contracts\Config\Repository;
 use Mdg\TracesAndStats;
 use PHPUnit\Framework\TestCase;
@@ -19,7 +20,8 @@ class SendTracingToApolloTest extends TestCase
     public function testGetReportWithTraces(): void
     {
         $tracing = new TracingResult(
-            '{ hello }',
+            Parser::parse($queryText = '{ hello }'),
+            $queryText,
             null,
             null,
             $this->sampleClientData(),

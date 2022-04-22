@@ -7,6 +7,7 @@ use BrightAlley\LighthouseApollo\Connectors\RedisConnector;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Config\Repository as Config;
+use Nuwave\Lighthouse\Schema\SchemaBuilder;
 
 /**
  * @psalm-suppress PropertyNotSetInConstructor
@@ -40,7 +41,7 @@ class SubmitTracing extends Command
     /**
      * Execute the console command.
      */
-    public function handle(): int
+    public function handle(SchemaBuilder $schemaBuilder): int
     {
         /** @var string $sendTracingMode */
         $sendTracingMode = $this->config->get(
@@ -55,6 +56,7 @@ class SubmitTracing extends Command
             case 'redis':
                 return $this->handleFromRedis(
                     $this->laravel->make(RedisConnector::class),
+                    $schemaBuilder,
                 );
             default:
                 $this->output->error(
@@ -64,15 +66,22 @@ class SubmitTracing extends Command
         }
     }
 
-    private function handleFromRedis(RedisConnector $connector): int
-    {
-        $total = $connector->chunk(function (array $tracings) use ($connector) {
+    private function handleFromRedis(
+        RedisConnector $connector,
+        SchemaBuilder $schemaBuilder
+    ): int {
+        $total = $connector->chunk(function (array $tracings) use (
+            $connector,
+            $schemaBuilder
+        ) {
             $this->output->writeln(
                 'Sending ' . count($tracings) . ' tracing(s) to Apollo Studio',
             );
 
             try {
-                (new SendTracingToApollo($this->config, $tracings))->send();
+                (new SendTracingToApollo($this->config, $tracings))->send(
+                    $schemaBuilder,
+                );
             } catch (Exception $e) {
                 $this->error('An error occurred submitting tracings:');
                 $this->error($e->getMessage());

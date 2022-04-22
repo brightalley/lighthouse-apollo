@@ -9,6 +9,7 @@ use BrightAlley\Tests\Support\UsesSampleData;
 use Exception;
 use GraphQL\Error\Error;
 use GraphQL\Error\FormattedError;
+use GraphQL\Language\Parser;
 use Illuminate\Support\Str;
 use Mdg\Trace;
 use PHPUnit\Framework\TestCase;
@@ -24,7 +25,8 @@ class TracingResultTest extends TestCase
     public function testGetTracingAsProtobuf(): void
     {
         $tracing = new TracingResult(
-            '{ hello }',
+            Parser::parse($queryText = 'query Foo { hello }'),
+            $queryText,
             null,
             null,
             $this->sampleClientData(),
@@ -46,7 +48,8 @@ class TracingResultTest extends TestCase
     public function testGetTracingAsProtobufWithVariables(): void
     {
         $tracing = new TracingResult(
-            '{ hello }',
+            Parser::parse($queryText = 'query Foo { hello }'),
+            $queryText,
             ['key' => json_encode('value', JSON_THROW_ON_ERROR)],
             null,
             $this->sampleClientData(),
@@ -78,7 +81,8 @@ class TracingResultTest extends TestCase
         array $clientData
     ): void {
         $tracing = new TracingResult(
-            '{ hello }',
+            Parser::parse($queryText = 'query Foo { hello }'),
+            $queryText,
             null,
             null,
             array_merge($this->sampleClientData(), $clientData),
@@ -102,7 +106,8 @@ class TracingResultTest extends TestCase
     {
         // Top level error should show up on root.
         $tracing = new TracingResult(
-            '{ hello }',
+            Parser::parse($queryText = 'query Foo { hello }'),
+            $queryText,
             null,
             null,
             $this->sampleClientData(),
@@ -146,7 +151,8 @@ class TracingResultTest extends TestCase
             'duration' => 500,
         ];
         $tracing = new TracingResult(
-            '{ hello { world } }',
+            Parser::parse($queryText = 'query Foo { hello { world } }'),
+            $queryText,
             null,
             null,
             $this->sampleClientData(),
@@ -208,7 +214,10 @@ class TracingResultTest extends TestCase
         ];
 
         $tracing = new TracingResult(
-            '{ hello { nested { world } } }',
+            Parser::parse(
+                $queryText = 'query Foo { hello { nested { world } } }',
+            ),
+            $queryText,
             null,
             null,
             $this->sampleClientData(),
@@ -256,7 +265,8 @@ class TracingResultTest extends TestCase
         ];
 
         $tracing = new TracingResult(
-            '{ hello foo }',
+            Parser::parse($queryText = 'query Foo { hello foo }'),
+            $queryText,
             null,
             null,
             $this->sampleClientData(),
@@ -288,7 +298,8 @@ class TracingResultTest extends TestCase
         ];
 
         $tracing = new TracingResult(
-            '{ hello node { world } }',
+            Parser::parse($queryText = 'query Foo { hello node { world } }'),
+            $queryText,
             null,
             null,
             $this->sampleClientData(),
