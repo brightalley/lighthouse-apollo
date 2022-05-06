@@ -160,7 +160,13 @@ class SendTracingToApollo
             return "# $operationName\n$trimmed";
         }
 
-        if (preg_match('/^(?:query|mutation) ([\w]+)/', $query, $matches)) {
+        if (
+            preg_match(
+                '/^(?:query|mutation|subscription) ([\w]+)/',
+                $query,
+                $matches,
+            )
+        ) {
             return "# ${matches[1]}\n$trimmed";
         }
 
