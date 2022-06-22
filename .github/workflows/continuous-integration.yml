@@ -64,12 +64,12 @@ jobs:
         run: "composer require illuminate/contracts:${{ matrix.laravel-version }} --no-interaction --prefer-dist ${{ matrix.composer-flags }}"
 
       - name: "Install dependencies with yarn"
-        uses: borales/actions-yarn@v2.3.0
+        uses: borales/actions-yarn@v3.0.0
         with:
           cmd: install
 
       - name: "Run prettier"
-        uses: borales/actions-yarn@v2.3.0
+        uses: borales/actions-yarn@v3.0.0
         with:
           cmd: "prettier --check src tests"
 

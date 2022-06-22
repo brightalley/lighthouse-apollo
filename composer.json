@@ -24,7 +24,7 @@
         "ext-curl": "*",
         "ext-json": "*",
         "ext-zlib": "*",
-        "czproject/git-php": "^3.18",
+        "czproject/git-php": "^4.0",
         "google/protobuf": "^v3.13.0.1",
         "illuminate/redis": "^6.0 || ^7.0 || ^8.0 || ^9.0",
         "illuminate/support": "^6.0 || ^7.0 || ^8.0 || ^9.0",
