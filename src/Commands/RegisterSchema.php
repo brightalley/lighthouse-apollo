@@ -6,8 +6,8 @@ use BrightAlley\LighthouseApollo\Exceptions\RegisterSchemaFailedException;
 use BrightAlley\LighthouseApollo\Exceptions\RegisterSchemaRequestFailedException;
 use BrightAlley\LighthouseApollo\Graph\GitContextInput;
 use BrightAlley\LighthouseApollo\Graph\UploadSchemaVariables;
-use Cz\Git\GitException;
-use Cz\Git\GitRepository;
+use CzProject\GitPhp\Git;
+use CzProject\GitPhp\GitException;
 use GraphQL\Utils\SchemaPrinter;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Config\Repository as Config;
@@ -150,7 +150,7 @@ class RegisterSchema extends Command
 
     private function getGitContext(): ?GitContextInput
     {
-        $repo = new GitRepository($this->app->basePath());
+        $repo = (new Git())->open($this->app->basePath());
 
         try {
             $currentBranchName = $repo->getCurrentBranchName();
@@ -158,14 +158,24 @@ class RegisterSchema extends Command
             $currentBranchName = null;
         }
 
-        $lastCommitId = $repo->getLastCommitId();
-        $commitData = $repo->getCommitData($lastCommitId);
+        try {
+            $lastCommitId = $repo->getLastCommitId();
+            $commitData = $repo->getCommit($lastCommitId);
+
+            $lastCommitHash = $lastCommitId->toString();
+            $author = $commitData->getAuthorName();
+            $subject = $commitData->getSubject();
+        } catch (GitException $e) {
+            $lastCommitHash = null;
+            $author = null;
+            $subject = null;
+        }
 
         return new GitContextInput(
             $currentBranchName,
-            $lastCommitId,
-            $commitData['author'],
-            $commitData['subject'],
+            $lastCommitHash,
+            $author,
+            $subject,
             null,
         );
     }
