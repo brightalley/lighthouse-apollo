@@ -245,7 +245,7 @@ class TracingResultTest extends TestCase
         self::assertJson($proto->getJson());
 
         $json = json_decode($proto->getJSON());
-        self::assertObjectHasAttribute('trace', $json);
+        self::assertTrue(isset($json->trace));
     }
 
     /**
