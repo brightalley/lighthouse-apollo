@@ -24,10 +24,17 @@ jobs:
           - "^7"
           - "^8"
           - "^9"
+          - "^10"
         composer-flags:
           - ""
           - "--prefer-lowest"
         exclude:
+          # Laravel 10.x doesn't support PHP 8.0.
+          - php-version: 8.0
+            laravel-version: ^10
+          # Laravel 10.x doesn't support PHP 7.4.
+          - php-version: 7.4
+            laravel-version: ^10
           # Laravel 9.x doesn't support PHP 7.4.
           - php-version: 7.4
             laravel-version: ^9
