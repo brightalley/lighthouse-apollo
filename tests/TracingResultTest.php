@@ -132,7 +132,7 @@ class TracingResultTest extends TestCase
         self::assertNotNull($proto->getRoot());
         self::assertCount(1, $proto->getRoot()->getError());
         self::assertEquals(
-            'some error',
+            'Internal server error',
             $proto
                 ->getRoot()
                 ->getError()
@@ -185,15 +185,17 @@ class TracingResultTest extends TestCase
         self::assertCount(1, $helloNode->getChild());
         self::assertCount(0, $helloNode->getError());
 
+        /** @var Trace\Node $worldNode */
         $worldNode = $helloNode->getChild()->offsetGet(0);
         self::assertEquals('world', $worldNode->getResponseName());
         self::assertCount(1, $worldNode->getError());
+
+        /** @var Trace\Error $error */
+        $error = $worldNode->getError()->offsetGet(0);
+        self::assertEquals('Internal server error', $error->getMessage());
         self::assertEquals(
             'some error',
-            $worldNode
-                ->getError()
-                ->offsetGet(0)
-                ->getMessage(),
+            json_decode($error->getJson())->extensions->debugMessage,
         );
     }
 
@@ -241,11 +243,13 @@ class TracingResultTest extends TestCase
         );
         $proto = TraceTreeBuilder::errorToProtobufError($error);
 
-        self::assertEquals('test', $proto->getMessage());
+        self::assertEquals('Internal server error', $proto->getMessage());
         self::assertJson($proto->getJson());
 
         $json = json_decode($proto->getJSON());
-        self::assertTrue(isset($json->trace));
+
+        self::assertTrue(isset($json->extensions->trace));
+        self::assertEquals('test', $json->extensions->debugMessage);
     }
 
     /**
