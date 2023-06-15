@@ -186,7 +186,7 @@ class ManipulateResultListener
     private function removeTracingFromExtensionsIfNeeded(
         ManipulateResult $event
     ): void {
-        if ($this->config->get('lighthouse-apollo.mute_tracing_extensions')) {
+        if ($this->config->get('lighthouse-apollo.mute_tracing_extensions') && $event->result->extensions) {
             unset($event->result->extensions['tracing']);
         }
     }
