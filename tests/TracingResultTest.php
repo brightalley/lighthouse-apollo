@@ -78,7 +78,7 @@ class TracingResultTest extends TestCase
      * @dataProvider nullableClientFields
      */
     public function testGetTracingAsProtobufNullableClientFields(
-        array $clientData
+        array $clientData,
     ): void {
         $tracing = new TracingResult(
             Parser::parse($queryText = 'query Foo { hello }'),

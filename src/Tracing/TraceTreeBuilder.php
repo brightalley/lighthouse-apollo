@@ -84,7 +84,7 @@ class TraceTreeBuilder
     {
         if (isset($http['request_headers'])) {
             $http['request_headers'] = array_map(static function (
-                array $values
+                array $values,
             ) {
                 return new Trace\HTTP\Values(['value' => $values]);
             },
@@ -251,7 +251,7 @@ class TraceTreeBuilder
      * earlier by Lighthouse.
      */
     private static function dateTimeStringToTimestampField(
-        string $dateTime
+        string $dateTime,
     ): Timestamp {
         $timestamp = new Timestamp();
         $timestamp->fromDateTime(new DateTime($dateTime));

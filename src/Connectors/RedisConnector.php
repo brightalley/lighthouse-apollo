@@ -178,7 +178,7 @@ class RedisConnector
 
         return array_map(
             static fn(
-                string $serializedTracingResult
+                string $serializedTracingResult,
             ): TracingResult => unserialize($serializedTracingResult, [
                 'allowed_classes' => [
                     // Only allow decoding tracing results.

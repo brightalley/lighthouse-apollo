@@ -68,11 +68,11 @@ class SubmitTracing extends Command
 
     private function handleFromRedis(
         RedisConnector $connector,
-        SchemaBuilder $schemaBuilder
+        SchemaBuilder $schemaBuilder,
     ): int {
         $total = $connector->chunk(function (array $tracings) use (
             $connector,
-            $schemaBuilder
+            $schemaBuilder,
         ) {
             $this->output->writeln(
                 'Sending ' . count($tracings) . ' tracing(s) to Apollo Studio',

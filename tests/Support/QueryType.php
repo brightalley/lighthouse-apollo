@@ -19,7 +19,7 @@ class QueryType extends ObjectType
                 $val,
                 $args,
                 $context,
-                ResolveInfo $info
+                ResolveInfo $info,
             ) {
                 return $this->{$info->fieldName}($val, $args, $context, $info);
             },
