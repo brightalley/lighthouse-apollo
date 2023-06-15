@@ -6,7 +6,6 @@ use BrightAlley\LighthouseApollo\TracingResult;
 use GraphQL\Language\AST\DirectiveDefinitionNode;
 use GraphQL\Language\AST\EnumTypeDefinitionNode;
 use GraphQL\Language\AST\EnumTypeExtensionNode;
-use GraphQL\Language\AST\ExecutableDefinitionNode;
 use GraphQL\Language\AST\FieldDefinitionNode;
 use GraphQL\Language\AST\InputObjectTypeDefinitionNode;
 use GraphQL\Language\AST\InputObjectTypeExtensionNode;
@@ -23,9 +22,7 @@ use GraphQL\Language\AST\ObjectTypeExtensionNode;
 use GraphQL\Language\AST\OperationDefinitionNode;
 use GraphQL\Language\AST\ScalarTypeDefinitionNode;
 use GraphQL\Language\AST\ScalarTypeExtensionNode;
-use GraphQL\Language\AST\SchemaDefinitionNode;
-use GraphQL\Language\AST\SchemaTypeExtensionNode;
-use GraphQL\Language\AST\TypeDefinitionNode;
+use GraphQL\Language\AST\SchemaExtensionNode;
 use GraphQL\Language\AST\UnionTypeDefinitionNode;
 use GraphQL\Language\AST\UnionTypeExtensionNode;
 use GraphQL\Language\AST\VariableDefinitionNode;
@@ -233,8 +230,7 @@ class RedisConnector
                     ObjectTypeExtensionNode::class,
                     ScalarTypeDefinitionNode::class,
                     ScalarTypeExtensionNode::class,
-                    SchemaDefinitionNode::class,
-                    SchemaTypeExtensionNode::class,
+                    SchemaExtensionNode::class,
                     UnionTypeDefinitionNode::class,
                     UnionTypeExtensionNode::class,
                 ],
