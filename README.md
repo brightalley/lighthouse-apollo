@@ -4,12 +4,12 @@ This library allows integrating your Lighthouse GraphQL project with Apollo Stud
 sending tracing statistics and allowing you to send your schema to Apollo for
 breaking changes notifications.
 
-## Requirements
+## Lighthouse requirements
 
-- PHP 7.4 or newer
-- Tested with Laravel 8 and Lighthouse 5.26
+This library is tested with Lighthouse 6.
 
 For Lighthouse 4.x, use version `1.x` of this library.
+For Lighthouse 5.x, use version `2.x` of this library.
 
 ## Installation
 
