@@ -60,7 +60,7 @@ class TracingResult
         array $client,
         array $http,
         array $tracing,
-        array $errors
+        array $errors,
     ) {
         $this->document = $document;
         $this->queryText = $queryText;

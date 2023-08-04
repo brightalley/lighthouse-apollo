@@ -19,7 +19,7 @@ class GitContextInput implements Arrayable
         ?string $commit,
         ?string $committer,
         ?string $message,
-        ?string $remoteUrl
+        ?string $remoteUrl,
     ) {
         $this->branch = $branch;
         $this->commit = $commit;

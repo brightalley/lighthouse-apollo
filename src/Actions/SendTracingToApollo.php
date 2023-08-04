@@ -153,7 +153,7 @@ class SendTracingToApollo
      */
     public function normalizeQuery(
         string $query,
-        ?string $operationName
+        ?string $operationName,
     ): string {
         $trimmed = trim(preg_replace('/[\r\n\s]+/', ' ', $query));
         if ($operationName !== null) {
@@ -247,7 +247,7 @@ class SendTracingToApollo
     private function writeProtobufValue(
         $process,
         $value,
-        bool $isRootObject = false
+        bool $isRootObject = false,
     ): void {
         if (is_bool($value)) {
             fwrite($process, $value ? 'true' : 'false');

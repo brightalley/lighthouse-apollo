@@ -112,7 +112,7 @@ class RegisterSchema extends Command
      * @throws JsonException
      */
     protected function sendSchemaToApollo(
-        UploadSchemaVariables $variables
+        UploadSchemaVariables $variables,
     ): array {
         $request = curl_init(
             $this->config->get('lighthouse-apollo.schema_reporting_endpoint'),

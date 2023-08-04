@@ -16,13 +16,9 @@ jobs:
     strategy:
       matrix:
         php-version:
-          - "7.4"
           - "8.0"
           - "8.1"
         laravel-version:
-          - "^6"
-          - "^7"
-          - "^8"
           - "^9"
           - "^10"
         composer-flags:
@@ -32,22 +28,9 @@ jobs:
           # Laravel 10.x doesn't support PHP 8.0.
           - php-version: 8.0
             laravel-version: ^10
-          # Laravel 10.x doesn't support PHP 7.4.
-          - php-version: 7.4
-            laravel-version: ^10
-          # Laravel 9.x doesn't support PHP 7.4.
-          - php-version: 7.4
-            laravel-version: ^9
-          # Laravel 6.x doesn't support PHP 8.1.
-          - php-version: 8.1
-            laravel-version: ^6
           # Older dev-tools don't properly support PHP 8.1.
           - php-version: 8.1
             composer-flags: --prefer-lowest
-        include:
-          # Count PHP 8.1 as experimental (CI failures allowed).
-          - php-version: 8.1
-            experimental: true
 
     steps:
       - name: "Checkout"

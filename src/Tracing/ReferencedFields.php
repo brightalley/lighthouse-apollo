@@ -13,6 +13,8 @@ use GraphQL\Language\AST\NodeList;
 use GraphQL\Language\AST\OperationDefinitionNode;
 use GraphQL\Language\Visitor;
 use GraphQL\Type\Definition\InterfaceType;
+use GraphQL\Type\Definition\ObjectType;
+use GraphQL\Type\Definition\UnionType;
 use GraphQL\Type\Schema;
 use GraphQL\Utils\TypeInfo;
 use LogicException;
@@ -22,11 +24,12 @@ class ReferencedFields
 {
     /**
      * @return array<string, ReferencedFieldsForType>
+     * @throws \Exception
      */
     public static function calculateReferencedFieldsByType(
         DocumentNode $document,
         Schema $schema,
-        ?string $resolvedOperationName
+        ?string $resolvedOperationName,
     ): array {
         // If the document contains multiple operations, we only care about fields
         // referenced in the operation we're using and in fragments that are
@@ -58,13 +61,15 @@ class ReferencedFields
         Visitor::visit(
             $filteredDocument,
             Visitor::visitWithTypeInfo($typeInfo, [
-                NodeKind::FIELD => function (FieldNode $field) use (
+                NodeKind::FIELD => function (Node $field) use (
                     $filteredDocument,
                     &$interfaces,
                     &$referencedFieldSetByType,
-                    $typeInfo
+                    $typeInfo,
                 ): void {
+                    /** @var FieldNode $field */
                     $fieldName = $field->name->value;
+                    /** @var ObjectType|InterfaceType|UnionType|null $parentType */
                     $parentType = $typeInfo->getParentType();
                     if ($parentType === null) {
                         throw new LogicException(
@@ -103,6 +108,7 @@ class ReferencedFields
 
     /**
      * @return array<string, DocumentNode>
+     * @throws \Exception
      */
     private static function separateOperations(DocumentNode $document): array
     {
@@ -119,23 +125,33 @@ class ReferencedFields
 
         // Populate metadata and build a dependency graph.
         Visitor::visit($document, [
-            NodeKind::OPERATION_DEFINITION => function (
-                OperationDefinitionNode $node
-            ) use (&$fromName, &$idx, &$operations, &$positions): void {
+            NodeKind::OPERATION_DEFINITION => function (Node $node) use (
+                &$fromName,
+                &$idx,
+                &$operations,
+                &$positions,
+            ): void {
+                /** @var OperationDefinitionNode $node */
                 $fromName = $node->name->value ?? '';
                 $operations[] = $node;
                 $positions[$fromName] = $idx++;
             },
-            NodeKind::FRAGMENT_DEFINITION => function (
-                FragmentDefinitionNode $node
-            ) use (&$fromName, &$idx, &$fragments, &$positions): void {
+            NodeKind::FRAGMENT_DEFINITION => function (Node $node) use (
+                &$fromName,
+                &$idx,
+                &$fragments,
+                &$positions,
+            ): void {
+                /** @var FragmentDefinitionNode $node */
                 $fromName = $node->name->value;
                 $fragments[$fromName] = $node;
                 $positions[$fromName] = $idx++;
             },
-            NodeKind::FRAGMENT_SPREAD => function (
-                FragmentSpreadNode $node
-            ) use (&$fromName, &$depGraph): void {
+            NodeKind::FRAGMENT_SPREAD => function (Node $node) use (
+                &$fromName,
+                &$depGraph,
+            ): void {
+                /** @var FragmentSpreadNode $node */
                 $toName = $node->name->value;
                 if (!isset($depGraph[$fromName])) {
                     $depGraph[$fromName] = [];
@@ -195,7 +211,7 @@ class ReferencedFields
     private static function collectTransitiveDependencies(
         array &$collected,
         array $depGraph,
-        string $fromName
+        string $fromName,
     ): void {
         $immediateDeps = $depGraph[$fromName] ?? null;
 

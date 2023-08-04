@@ -63,7 +63,7 @@ class ManipulateResultListener
         Container $container,
         QueryRequestStack $requestStack,
         Request $request,
-        SchemaBuilder $schemaBuilder
+        SchemaBuilder $schemaBuilder,
     ) {
         $this->clientInformationExtractor = $clientInformationExtractor;
         $this->config = $config;
@@ -184,9 +184,12 @@ class ManipulateResultListener
     }
 
     private function removeTracingFromExtensionsIfNeeded(
-        ManipulateResult $event
+        ManipulateResult $event,
     ): void {
-        if ($this->config->get('lighthouse-apollo.mute_tracing_extensions')) {
+        if (
+            $this->config->get('lighthouse-apollo.mute_tracing_extensions') &&
+            $event->result->extensions
+        ) {
             unset($event->result->extensions['tracing']);
         }
     }

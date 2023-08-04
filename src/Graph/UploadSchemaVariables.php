@@ -17,7 +17,7 @@ class UploadSchemaVariables implements Arrayable
         string $id,
         string $schemaDocument,
         string $tag,
-        ?GitContextInput $gitContext
+        ?GitContextInput $gitContext,
     ) {
         $this->id = $id;
         $this->tag = $tag;
