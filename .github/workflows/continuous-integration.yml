@@ -1,70 +1,66 @@
-name: "Continuous Integration"
+name: Continuous Integration
 
 on:
   pull_request:
   push:
 
 env:
-  REQUIRED_PHP_EXTENSIONS: "curl, json, zlib"
+  REQUIRED_PHP_EXTENSIONS: curl, json, zlib
 
 jobs:
   static-code-analysis:
-    name: "Code Analysis"
+    name: Code Analysis
 
-    runs-on: "ubuntu-latest"
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        php-version:
-          - "8.0"
-          - "8.1"
-        laravel-version:
-          - "^9"
-          - "^10"
-        composer-flags:
-          - ""
-          - "--prefer-lowest"
+        php-version: ['8.0', '8.1', '8.2']
+        laravel-version: ['11.0', ^9, ^10]
+        composer-flags: ['', '--prefer-lowest']
         exclude:
-          # Laravel 10.x doesn't support PHP 8.0.
           - php-version: 8.0
             laravel-version: ^10
-          # Older dev-tools don't properly support PHP 8.1.
           - php-version: 8.1
             composer-flags: --prefer-lowest
+          - laravel-version: '11.0'
+            php-version: '8.0'
+          - laravel-version: '11.0'
+            php-version: '8.1'
 
     steps:
-      - name: "Checkout"
-        uses: "actions/checkout@v2.0.0"
+      - name: Checkout
+        uses: actions/checkout@v2.0.0
 
-      - name: "Install PHP with extensions"
-        uses: "shivammathur/setup-php@2.1.0"
+      - name: Install PHP with extensions
+        uses: shivammathur/setup-php@2.1.0
         with:
-          coverage: "none"
-          extensions: "${{ env.REQUIRED_PHP_EXTENSIONS }}"
-          php-version: "${{ matrix.php-version }}"
+          coverage: none
+          extensions: ${{ env.REQUIRED_PHP_EXTENSIONS }}
+          php-version: ${{ matrix.php-version }}
 
-      - name: "Cache dependencies installed with composer"
-        uses: "actions/cache@v1.0.3"
+      - name: Cache dependencies installed with composer
+        uses: actions/cache@v1.0.3
         with:
-          path: "~/.composer/cache"
-          key: "php-${{ matrix.php-version }}-composer-${{ matrix.laravel-version }}"
-          restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.laravel-version }}-"
+          path: ~/.composer/cache
+          key: php-${{ matrix.php-version }}-composer-${{ matrix.laravel-version }}
+          restore-keys: php-${{ matrix.php-version }}-composer-${{ matrix.laravel-version }}-
 
-      - name: "Install dependencies with composer"
-        run: "composer require illuminate/contracts:${{ matrix.laravel-version }} --no-interaction --prefer-dist ${{ matrix.composer-flags }}"
+      - name: Install dependencies with composer
+        run: composer require illuminate/contracts:${{ matrix.laravel-version }} --no-interaction --prefer-dist ${{ matrix.composer-flags }}
 
-      - name: "Install dependencies with yarn"
+      - name: Install dependencies with yarn
         uses: borales/actions-yarn@v3.0.0
         with:
           cmd: install
 
-      - name: "Run prettier"
+      - name: Run prettier
         uses: borales/actions-yarn@v3.0.0
         with:
-          cmd: "prettier --check src tests"
+          cmd: prettier --check src tests
 
-      - name: "Run psalm"
-        run: "vendor/bin/psalm --php-version=${{ matrix.php-version }}"
+      - name: Run psalm
+        run: vendor/bin/psalm --php-version=${{ matrix.php-version }}
 
-      - name: "Run phpunit"
-        run: "vendor/bin/phpunit"
+      - name: Run phpunit
+        run: vendor/bin/phpunit
